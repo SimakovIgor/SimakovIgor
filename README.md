@@ -1,6 +1,4 @@
-### Hi there 👋
-
-### **CODING STATS**
+<div align="center">I'm Igor :moon:</div>
 
 <p align="middle">
 <img width="450" src="https://github-readme-stats.vercel.app/api?username=SimakovIgor&show_icons=true&count_private=true&bg_color=22272e&title_color=adbac7&icon_color=636e7b&text_color=adbac7&border_color=444c56">
