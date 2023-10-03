@@ -52,8 +52,9 @@
 
 ###
 
+<!--START_SECTION:waka-->
+<!--END_SECTION:waka-->
 
-[![Harlok's wakatime stats](https://github-readme-stats.vercel.app/api/wakatime?username=SimakovIgor&layout=compact&line_height=15)](https://github.com/anuraghazra/github-readme-stats)
 
 <!--
 **SimakovIgor/SimakovIgor** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
