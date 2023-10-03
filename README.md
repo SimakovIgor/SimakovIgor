@@ -1,14 +1,8 @@
 <h4 align="left">Hello✌️! My name is Igor Simakov and I am a Tech/Team Lead, Java mentor and coach</h4>
 
-<!--<div align="left">
-  <img src="https://github-readme-stats.vercel.app/api?username=SimakovIgor&hide_title=false&hide_rank=false&show_icons=true&include_all_commits=true&count_private=true&disable_animations=false&theme=dark&locale=en&hide_border=true&order=1" height="150" alt="stats graph"  />
-  <img src="https://github-readme-stats.vercel.app/api/top-langs?username=SimakovIgor&locale=en&hide_title=false&layout=compact&card_width=320&langs_count=5&theme=dark&hide_border=true&order=2" height="150" alt="languages graph"  />
-  <img src="https://streak-stats.demolab.com?user=SimakovIgor&locale=en&mode=daily&theme=dark&hide_border=true&border_radius=5&order=3" height="150" alt="streak graph"  />
-</div> -->
-
 ###
 
-<h3 align="left">🛠 Languages and tools</h3>
+<h5 align="left">🛠 Languages and tools</h5>
 
 ###
 
@@ -31,10 +25,9 @@
 </div>
 
 
-<!--<img src="https://media.giphy.com/media/LnQjpWaON8nhr21vNW/giphy.gif" width="60"> <em><b>I love connecting with different people</b> so if you want to say <b>hi, I'll be happy to meet you more!</b> 😊 </em> -->
+<img src="https://media.giphy.com/media/LnQjpWaON8nhr21vNW/giphy.gif" width="60"> <em><b>I love connecting with different people</b> so if you want to say <b>hi, I'll be happy to meet you more!</b> 😊 </em> 
 
 ---
-
 <!--START_SECTION:waka-->
 ![Code Time](http://img.shields.io/badge/Code%20Time-1%2C303%20hrs%2014%20mins-blue)
 
