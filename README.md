@@ -50,6 +50,11 @@
   </a>
 </div>
 
+###
+
+
+[![Harlok's wakatime stats](https://github-readme-stats.vercel.app/api/wakatime?username=)](https://github.com/anuraghazra/github-readme-stats)
+
 <!--
 **SimakovIgor/SimakovIgor** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
 
