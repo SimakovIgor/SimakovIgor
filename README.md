@@ -1,4 +1,5 @@
-<h3 align="left">Hello✌️! My name is Igor Simakov and I am a Tech/Team Lead, Java mentor and coach</h3>
+<h3 align="left">Hi✌️! My name is Igor</h3> 
+I am a Tech/Team Lead, Java mentor and coach
 
 <h4 align="left">🛠 Languages and tools</h4>
 
