@@ -1,9 +1,10 @@
-<h3 align="left">Hi✌️ My name is Igor</h3> 
-I am a Tech/Team Lead and Java mentor
+<h3 align="left">Hi! ✌️ My name is Igor</h3> 
 
-<h4 align="left">🛠 Im my work i usually use</h4>
+<p align="left">I am a Tech/Team Lead and Java mentor.</p>
 
-<div align="left">
+<h4 align="left">🛠 In my work, I usually use</h4>
+
+<p align="left">
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg" height="40" alt="java logo"  />
   <img width="12" />
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/spring/spring-original.svg" height="40" alt="spring logo"  />
@@ -19,7 +20,7 @@ I am a Tech/Team Lead and Java mentor
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/redis/redis-original.svg" height="40" alt="redis logo"  />
   <img width="12" />
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg" height="40" alt="git logo"  />
-</div>
+</p>
 
 
 <!--<img src="https://media.giphy.com/media/LnQjpWaON8nhr21vNW/giphy.gif" width="60"> <em><b>I love connecting with different people</b> so if you want to say <b>hi, I'll be happy to meet you more!</b> 😊 </em> -->
