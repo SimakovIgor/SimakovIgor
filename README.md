@@ -1,7 +1,7 @@
-<h3 align="left">Hi✌️! My name is Igor</h3> 
-I am a Tech/Team Lead, Java mentor and coach
+<h3 align="left">Hi✌️ My name is Igor</h3> 
+I am a Tech/Team Lead and Java mentor
 
-<h4 align="left">🛠 Languages and tools</h4>
+<h4 align="left">🛠 Im my work i usually use</h4>
 
 <div align="left">
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg" height="40" alt="java logo"  />
