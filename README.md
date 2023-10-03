@@ -1,10 +1,6 @@
-<h4 align="left">Hello✌️! My name is Igor Simakov and I am a Tech/Team Lead, Java mentor and coach</h4>
+<h3 align="left">Hello✌️! My name is Igor Simakov and I am a Tech/Team Lead, Java mentor and coach</h3>
 
-###
-
-<h5 align="left">🛠 Languages and tools</h5>
-
-###
+<h4 align="left">🛠 Languages and tools</h4>
 
 <div align="left">
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg" height="40" alt="java logo"  />
