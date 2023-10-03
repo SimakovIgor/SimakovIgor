@@ -1,16 +1,10 @@
 <h4 align="left">Hello✌️! My name is Igor Simakov and I am a Tech/Team Lead, Java mentor and coach</h4>
 
-###
-
-<h4 align="left">🔥 My stats</h4>
-
-###
-
-<div align="left">
+<!--<div align="left">
   <img src="https://github-readme-stats.vercel.app/api?username=SimakovIgor&hide_title=false&hide_rank=false&show_icons=true&include_all_commits=true&count_private=true&disable_animations=false&theme=dark&locale=en&hide_border=true&order=1" height="150" alt="stats graph"  />
   <img src="https://github-readme-stats.vercel.app/api/top-langs?username=SimakovIgor&locale=en&hide_title=false&layout=compact&card_width=320&langs_count=5&theme=dark&hide_border=true&order=2" height="150" alt="languages graph"  />
   <img src="https://streak-stats.demolab.com?user=SimakovIgor&locale=en&mode=daily&theme=dark&hide_border=true&border_radius=5&order=3" height="150" alt="streak graph"  />
-</div>
+</div> -->
 
 ###
 
@@ -36,21 +30,17 @@
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg" height="40" alt="git logo"  />
 </div>
 
+
+<!--<img src="https://media.giphy.com/media/LnQjpWaON8nhr21vNW/giphy.gif" width="60"> <em><b>I love connecting with different people</b> so if you want to say <b>hi, I'll be happy to meet you more!</b> 😊 -->
+
 ###
 
-<p align="left">📝 Contact me</p>
+<h4 align="left">🔥 My stats</h4>
 
 ###
 
-<br clear="both">
 
-<div align="left">
-  <a href="www.linkedin.com/in/igor-simakov-131198233" target="_blank">
-    <img src="https://raw.githubusercontent.com/maurodesouza/profile-readme-generator/master/src/assets/icons/social/linkedin/default.svg" width="52" height="40" alt="linkedin logo"  />
-  </a>
-</div>
-
-<img src="https://media.giphy.com/media/LnQjpWaON8nhr21vNW/giphy.gif" width="60"> <em><b>I love connecting with different people</b> so if you want to say <b>hi, I'll be happy to meet you more!</b> 😊</em>
+</em>
 
 ---
 
