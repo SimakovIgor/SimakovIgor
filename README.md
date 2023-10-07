@@ -1,6 +1,4 @@
-<h3 align="left">Hi! ✌️ My name is Igor</h3> 
-
-<p align="left">I am a Tech/Team Lead and Java mentor</p>
+<h3 align="left">Hi! ✌️ My name is Igor</h3>
 
 <p align="left">
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg" height="40" alt="java logo"  />
