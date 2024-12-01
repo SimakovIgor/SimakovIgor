@@ -21,15 +21,15 @@
 
 ---
 <!--START_SECTION:waka-->
-![Code Time](http://img.shields.io/badge/Code%20Time-2%2C182%20hrs%2041%20mins-blue)
+![Code Time](http://img.shields.io/badge/Code%20Time-2%2C183%20hrs%2057%20mins-blue)
 
-![Profile Views](http://img.shields.io/badge/Profile%20Views-40-blue)
+![Profile Views](http://img.shields.io/badge/Profile%20Views-4-blue)
 
-![Lines of code](https://img.shields.io/badge/From%20Hello%20World%20I%27ve%20Written-551.8%20thousand%20lines%20of%20code-blue)
+![Lines of code](https://img.shields.io/badge/From%20Hello%20World%20I%27ve%20Written-552.1%20thousand%20lines%20of%20code-blue)
 
 **🐱 My GitHub Data** 
 
-> 📦 101.2 kB Used in GitHub's Storage 
+> 📦 101.3 kB Used in GitHub's Storage 
  > 
 > 🚫 Not Opted to Hire
  > 
@@ -37,47 +37,6 @@
  > 
 > 🔑 4 Private Repositories 
  > 
-**I'm a Night 🦉** 
-
-```text
-🌞 Morning                109 commits         ███░░░░░░░░░░░░░░░░░░░░░░   10.86 % 
-🌆 Daytime                351 commits         █████████░░░░░░░░░░░░░░░░   34.96 % 
-🌃 Evening                427 commits         ███████████░░░░░░░░░░░░░░   42.53 % 
-🌙 Night                  117 commits         ███░░░░░░░░░░░░░░░░░░░░░░   11.65 % 
-```
-📅 **I'm Most Productive on Friday** 
-
-```text
-Monday                   158 commits         ████░░░░░░░░░░░░░░░░░░░░░   15.74 % 
-Tuesday                  149 commits         ████░░░░░░░░░░░░░░░░░░░░░   14.84 % 
-Wednesday                185 commits         █████░░░░░░░░░░░░░░░░░░░░   18.43 % 
-Thursday                 194 commits         █████░░░░░░░░░░░░░░░░░░░░   19.32 % 
-Friday                   228 commits         ██████░░░░░░░░░░░░░░░░░░░   22.71 % 
-Saturday                 66 commits          ██░░░░░░░░░░░░░░░░░░░░░░░   06.57 % 
-Sunday                   24 commits          █░░░░░░░░░░░░░░░░░░░░░░░░   02.39 % 
-```
-
-
-📊 **This Week I Spent My Time On** 
-
-```text
-🕑︎ Time Zone: Asia/Singapore
-
-💬 Programming Languages: 
-Java                     16 hrs 11 mins      ██████████████████████░░░   88.32 % 
-SQL                      45 mins             █░░░░░░░░░░░░░░░░░░░░░░░░   04.12 % 
-XML                      44 mins             █░░░░░░░░░░░░░░░░░░░░░░░░   04.00 % 
-YAML                     20 mins             ░░░░░░░░░░░░░░░░░░░░░░░░░   01.82 % 
-HTTP Request             15 mins             ░░░░░░░░░░░░░░░░░░░░░░░░░   01.38 % 
-
-🔥 Editors: 
-IntelliJ IDEA            17 hrs 35 mins      ████████████████████████░   95.88 % 
-DataGrip                 45 mins             █░░░░░░░░░░░░░░░░░░░░░░░░   04.12 % 
-
-💻 Operating System: 
-Mac                      18 hrs 20 mins      █████████████████████████   100.00 % 
-```
-
 **I Mostly Code in Java** 
 
 ```text
@@ -91,7 +50,7 @@ JavaScript               1 repo              ░░░░░░░░░░░�
 
 
 
- Last Updated on 30/11/2024 18:44:09 UTC
+ Last Updated on 01/12/2024 18:44:32 UTC
 <!--END_SECTION:waka-->
 
 
