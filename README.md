@@ -21,6 +21,8 @@
 
 ---
 <!--START_SECTION:waka-->
+![Code Time](http://img.shields.io/badge/Code%20Time-2%2C344%20hrs%2059%20mins-blue)
+
 ![Profile Views](http://img.shields.io/badge/Profile%20Views-0-blue)
 
 ![Lines of code](https://img.shields.io/badge/From%20Hello%20World%20I%27ve%20Written-5.9%20million%20lines%20of%20code-blue)
@@ -29,7 +31,7 @@
 
 > 📦 101.5 kB Used in GitHub's Storage 
  > 
-> 🏆 763 Contributions in the Year 2025
+> 🏆 781 Contributions in the Year 2025
  > 
 > 🚫 Not Opted to Hire
  > 
@@ -37,6 +39,42 @@
  > 
 > 🔑 4 Private Repositories 
  > 
+**I'm a Night 🦉** 
+
+```text
+🌞 Morning                831 commits         █░░░░░░░░░░░░░░░░░░░░░░░░   03.76 % 
+🌆 Daytime                9052 commits        ██████████░░░░░░░░░░░░░░░   41.00 % 
+🌃 Evening                10797 commits       ████████████░░░░░░░░░░░░░   48.90 % 
+🌙 Night                  1400 commits        ██░░░░░░░░░░░░░░░░░░░░░░░   06.34 % 
+```
+📅 **I'm Most Productive on Friday** 
+
+```text
+Monday                   1969 commits        ██░░░░░░░░░░░░░░░░░░░░░░░   08.92 % 
+Tuesday                  4238 commits        █████░░░░░░░░░░░░░░░░░░░░   19.19 % 
+Wednesday                3166 commits        ████░░░░░░░░░░░░░░░░░░░░░   14.34 % 
+Thursday                 4852 commits        █████░░░░░░░░░░░░░░░░░░░░   21.97 % 
+Friday                   7273 commits        ████████░░░░░░░░░░░░░░░░░   32.94 % 
+Saturday                 536 commits         █░░░░░░░░░░░░░░░░░░░░░░░░   02.43 % 
+Sunday                   46 commits          ░░░░░░░░░░░░░░░░░░░░░░░░░   00.21 % 
+```
+
+
+📊 **This Week I Spent My Time On** 
+
+```text
+🕑︎ Time Zone: Asia/Singapore
+
+💬 Programming Languages: 
+No Activity Tracked This Week
+
+🔥 Editors: 
+No Activity Tracked This Week
+
+💻 Operating System: 
+No Activity Tracked This Week
+```
+
 **I Mostly Code in Java** 
 
 ```text
@@ -50,7 +88,7 @@ JavaScript               1 repo              ░░░░░░░░░░░�
 
 
 
- Last Updated on 01/07/2025 18:58:49 UTC
+ Last Updated on 02/07/2025 18:59:20 UTC
 <!--END_SECTION:waka-->
 
 
