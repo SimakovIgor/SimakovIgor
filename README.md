@@ -21,17 +21,17 @@
 
 ---
 <!--START_SECTION:waka-->
-![Code Time](http://img.shields.io/badge/Code%20Time-2%2C808%20hrs%2013%20mins-blue?style=flat)
+![Code Time](http://img.shields.io/badge/Code%20Time-2%2C818%20hrs%2031%20mins-blue?style=flat)
 
 ![Profile Views](http://img.shields.io/badge/Profile%20Views-0-blue?style=flat)
 
-![Lines of code](https://img.shields.io/badge/From%20Hello%20World%20I%27ve%20Written-32.41%20million%20lines%20of%20code-blue?style=flat)
+![Lines of code](https://img.shields.io/badge/From%20Hello%20World%20I%27ve%20Written-37.46%20million%20lines%20of%20code-blue?style=flat)
 
 **🐱 My GitHub Data** 
 
-> 📦 117.6 kB Used in GitHub's Storage 
+> 📦 117.5 kB Used in GitHub's Storage 
  > 
-> 🏆 793 Contributions in the Year 2026
+> 🏆 850 Contributions in the Year 2026
  > 
 > 🚫 Not Opted to Hire
  > 
@@ -39,20 +39,62 @@
  > 
 > 🔑 8 Private Repositories 
  > 
+**I'm a Night 🦉** 
+
+```text
+🌞 Morning                5148 commits        █░░░░░░░░░░░░░░░░░░░░░░░░   04.88 % 
+🌆 Daytime                44478 commits       ███████████░░░░░░░░░░░░░░   42.15 % 
+🌃 Evening                42899 commits       ██████████░░░░░░░░░░░░░░░   40.66 % 
+🌙 Night                  12989 commits       ███░░░░░░░░░░░░░░░░░░░░░░   12.31 % 
+```
+📅 **I'm Most Productive on Friday** 
+
+```text
+Monday                   18794 commits       ████░░░░░░░░░░░░░░░░░░░░░   17.81 % 
+Tuesday                  17054 commits       ████░░░░░░░░░░░░░░░░░░░░░   16.16 % 
+Wednesday                9986 commits        ██░░░░░░░░░░░░░░░░░░░░░░░   09.46 % 
+Thursday                 20627 commits       █████░░░░░░░░░░░░░░░░░░░░   19.55 % 
+Friday                   21324 commits       █████░░░░░░░░░░░░░░░░░░░░   20.21 % 
+Saturday                 5636 commits        █░░░░░░░░░░░░░░░░░░░░░░░░   05.34 % 
+Sunday                   12093 commits       ███░░░░░░░░░░░░░░░░░░░░░░   11.46 % 
+```
+
+
+📊 **This Week I Spent My Time On** 
+
+```text
+🕑︎ Time Zone: Asia/Makassar
+
+💬 Programming Languages: 
+Java                     25 hrs 47 mins      ███████████░░░░░░░░░░░░░░   44.47 % 
+HTML                     11 hrs 31 mins      █████░░░░░░░░░░░░░░░░░░░░   19.87 % 
+Markdown                 9 hrs 46 mins       ████░░░░░░░░░░░░░░░░░░░░░   16.87 % 
+CSS                      3 hrs 8 mins        █░░░░░░░░░░░░░░░░░░░░░░░░   05.42 % 
+YAML                     1 hr 56 mins        █░░░░░░░░░░░░░░░░░░░░░░░░   03.34 % 
+
+🔥 Editors: 
+Claude Code              56 hrs 11 mins      ████████████████████████░   96.90 % 
+IntelliJ IDEA            1 hr 44 mins        █░░░░░░░░░░░░░░░░░░░░░░░░   02.99 % 
+PyCharm                  3 mins              ░░░░░░░░░░░░░░░░░░░░░░░░░   00.11 % 
+
+💻 Operating System: 
+Mac                      57 hrs 59 mins      █████████████████████████   100.00 % 
+```
+
 **I Mostly Code in Java** 
 
 ```text
-Java                     65 repos            █████████████████████░░░░   82.28 % 
-Python                   5 repos             ██░░░░░░░░░░░░░░░░░░░░░░░   06.33 % 
-HTML                     3 repos             █░░░░░░░░░░░░░░░░░░░░░░░░   03.80 % 
-Swift                    1 repo              ░░░░░░░░░░░░░░░░░░░░░░░░░   01.27 % 
-C#                       1 repo              ░░░░░░░░░░░░░░░░░░░░░░░░░   01.27 % 
+Java                     64 repos            █████████████████████░░░░   82.05 % 
+Python                   5 repos             ██░░░░░░░░░░░░░░░░░░░░░░░   06.41 % 
+HTML                     3 repos             █░░░░░░░░░░░░░░░░░░░░░░░░   03.85 % 
+Swift                    1 repo              ░░░░░░░░░░░░░░░░░░░░░░░░░   01.28 % 
+C#                       1 repo              ░░░░░░░░░░░░░░░░░░░░░░░░░   01.28 % 
 ```
 
 
 
 
- Last Updated on 19/05/2026 19:59:16 UTC
+ Last Updated on 20/05/2026 20:06:14 UTC
 <!--END_SECTION:waka-->
 
 
