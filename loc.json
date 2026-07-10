@@ -1,0 +1,138 @@
+{
+  "web-audio-api": {
+    "add": 23601,
+    "del": 1414
+  },
+  "scoring-system": {
+    "add": 35824,
+    "del": 10834
+  },
+  "belle-estate": {
+    "add": 2930,
+    "del": 1164
+  },
+  "food-sharing": {
+    "add": 18381,
+    "del": 1954
+  },
+  "assistant-server": {
+    "add": 41795,
+    "del": 310
+  },
+  "scrum-help-bot": {
+    "add": 3163,
+    "del": 1012
+  },
+  "java-roadmap": {
+    "add": 15534,
+    "del": 539
+  },
+  "algorithms": {
+    "add": 1228,
+    "del": 79
+  },
+  "simakov-spring-security": {
+    "add": 864,
+    "del": 7
+  },
+  "ya-eda-data-bot": {
+    "add": 0,
+    "del": 0
+  },
+  "car-showroom": {
+    "add": 0,
+    "del": 0
+  },
+  "task-planner-java": {
+    "add": 0,
+    "del": 0
+  },
+  "microservices-commons": {
+    "add": 24,
+    "del": 24
+  },
+  "microservices-customer": {
+    "add": 12,
+    "del": 12
+  },
+  "microservices-fraud": {
+    "add": 46,
+    "del": 10
+  },
+  "microservices-eureka-server": {
+    "add": 0,
+    "del": 0
+  },
+  "microservices-notification": {
+    "add": 0,
+    "del": 0
+  },
+  "microservices-apigw": {
+    "add": 0,
+    "del": 0
+  },
+  "pprb": {
+    "add": 0,
+    "del": 0
+  },
+  "tic-tac-toe": {
+    "add": 0,
+    "del": 0
+  },
+  "raytracer": {
+    "add": 0,
+    "del": 0
+  },
+  "java-playground": {
+    "add": 38,
+    "del": 22
+  },
+  "SimakovIgor": {
+    "add": 175,
+    "del": 132
+  },
+  "smkv-quality-plugins": {
+    "add": 9,
+    "del": 9
+  },
+  "smkv-base": {
+    "add": 44,
+    "del": 44
+  },
+  "bali-events-bot": {
+    "add": 1393,
+    "del": 1693
+  },
+  "gitlab-analytics": {
+    "add": 314113,
+    "del": 125028
+  },
+  "team-onboarding": {
+    "add": 3505,
+    "del": 317
+  },
+  "link": {
+    "add": 198,
+    "del": 0
+  },
+  "natasha-project": {
+    "add": 0,
+    "del": 0
+  },
+  "reels-analyzer": {
+    "add": 59302,
+    "del": 16308
+  },
+  "luna-tarot": {
+    "add": 42770,
+    "del": 4668
+  },
+  "bali_event_bot": {
+    "add": 23102,
+    "del": 2487
+  },
+  "steel-vpn": {
+    "add": 191595,
+    "del": 8375
+  }
+}

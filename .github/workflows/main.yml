@@ -1,0 +1,41 @@
+name: profile card
+
+on:
+  schedule:
+    - cron: "17 2 * * *"      # every day 02:17 UTC
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - "today.py"
+      - "build_svg.py"
+      - "face.json"
+      - ".github/workflows/main.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: profile-card
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Regenerate cards from live stats
+        env:
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python today.py
+      - name: Commit refreshed cards
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add dark.svg light.svg stats.json loc.json
+          git diff --staged --quiet || git commit -m "chore: refresh profile card [skip ci]"
+          git push
