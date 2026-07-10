@@ -9,6 +9,10 @@ try:
     STATS = json.load(open("stats.json"))
 except FileNotFoundError:
     STATS = {}
+try:
+    TOOLS = json.load(open("tools.json"))     # [[name, inner_svg], ...]
+except FileNotFoundError:
+    TOOLS = []
 
 def S(k, d):
     return STATS.get(k, d)
@@ -27,15 +31,17 @@ PAL = {
                  ink="#e7e2ef", dim="#9a92ab", faint="#6a6379",
                  accent="#f2adc0", accent2="#c3b1de", num="#e9a86b",
                  ok="#7fd6a9", bad="#ef7a72", baron="#f2adc0", baroff="#2f2838",
+                 shadow="#050409", shadow_op=0.5,
                  vmin=0.60, vmax=1.0, smul=1.05),
     "light": dict(card="#fbf7f4", card2="#f4ecee", border="#e6d8dd",
                   ink="#241d29", dim="#6c6172", faint="#a99ba6",
                   accent="#c25e86", accent2="#7a5fb0", num="#c07a2e",
                   ok="#2f9e6b", bad="#d64a3e", baron="#c25e86", baroff="#e6d8dd",
+                  shadow="#7a5fb0", shadow_op=0.20,
                   vmin=0.0, vmax=0.60, smul=1.15),
 }
 
-M = 14
+M = 30
 PAD_L, PAD_R = 12, 28
 TITLE_H = 44
 AF = 9.0
@@ -157,16 +163,22 @@ def build(theme):
     body_top = M + TITLE_H + 24
     ascii_dy = body_top + max(0, (content_h - ascii_h) / 2)
     fetch_dy = body_top + max(0, (content_h - fetch_h) / 2)
-    W = int(max(ascii_x + ascii_w, fetch_x + fetch_w) + PAD_R + M)
-    H = int(body_top + content_h + PAD_R + M)
+    ICON, IGAP = 27, 17
+    tools_w = len(TOOLS) * ICON + (len(TOOLS) - 1) * IGAP if TOOLS else 0
+    tools_band = 68 if TOOLS else 0
+    W = int(max(ascii_x + ascii_w, fetch_x + fetch_w, tools_w + 2 * (M + PAD_L)) + PAD_R + M)
+    H = int(body_top + content_h + PAD_R + M) + tools_band
     line_w = ncur * FCW
 
     o = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" '
          f'font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace">']
     o.append(
         f'<defs>'
-        f'<filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="10" stdDeviation="22" flood-color="{p["accent"]}" flood-opacity="0.18"/></filter>'
+        f'<filter id="soft" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="13"/></filter>'
+        f'<filter id="fea" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4.5"/></filter>'
         f'<filter id="cg" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.2"/></filter>'
+        f'<mask id="feather" maskUnits="userSpaceOnUse" x="0" y="0" width="{W}" height="{H}">'
+        f'<rect x="{M}" y="{M}" width="{W-2*M}" height="{H-2*M}" rx="16" fill="#fff" filter="url(#fea)"/></mask>'
         f'<style>'
         f'.type{{animation:type 1.7s steps({ncur},end) .45s both}}'
         f'@keyframes type{{from{{clip-path:inset(-3px 101% -3px -3px)}}to{{clip-path:inset(-3px -3px -3px -3px)}}}}'
@@ -178,9 +190,15 @@ def build(theme):
         f'</style></defs>')
 
     cx, cy, cw, ch = M, M, W - 2 * M, H - 2 * M
-    o.append(f'<rect x="{cx}" y="{cy}" width="{cw}" height="{ch}" rx="16" fill="{p["card"]}" stroke="{p["border"]}" filter="url(#sh)"/>')
+    # soft shadow halo — melts the card into the page background
+    o.append(f'<rect x="{cx}" y="{cy+4}" width="{cw}" height="{ch}" rx="18" fill="{p["shadow"]}" opacity="{p["shadow_op"]}" filter="url(#soft)"/>')
+    # feathered panel — edges fade instead of a hard rectangle
+    o.append('<g mask="url(#feather)">')
+    o.append(f'<rect x="{cx}" y="{cy}" width="{cw}" height="{ch}" rx="16" fill="{p["card"]}"/>')
+    o.append(f'<rect x="{cx}" y="{cy}" width="{cw}" height="{ch}" rx="16" fill="none" stroke="{p["border"]}" stroke-opacity="0.7"/>')
     o.append(f'<path d="M{cx},{cy+16} a16,16 0 0 1 16,-16 h{cw-32} a16,16 0 0 1 16,16 v{TITLE_H-16} h-{cw} z" fill="{p["card2"]}"/>')
     o.append(f'<line x1="{cx}" y1="{cy+TITLE_H}" x2="{cx+cw}" y2="{cy+TITLE_H}" stroke="{p["border"]}"/>')
+    o.append('</g>')
     ty = cy + TITLE_H / 2
     for i, col in enumerate(["#ec6a5e", "#f4bf4f", "#61c554"]):
         o.append(f'<circle cx="{cx+22+i*18}" cy="{ty}" r="6" fill="{col}"/>')
@@ -200,6 +218,16 @@ def build(theme):
     curX = fetch_x + curx; curY = fetch_dy + cury
     o.append(f'<rect class="tcur" x="{curX:.0f}" y="{curY:.0f}" width="{FCW+1:.0f}" height="{FF:.0f}" rx="1" fill="{p["accent"]}" filter="url(#cg)" opacity="0.55"/>')
     o.append(f'<rect class="tcur" x="{curX:.0f}" y="{curY:.0f}" width="{FCW+1:.0f}" height="{FF:.0f}" rx="1" fill="{p["accent"]}"/>')
+
+    # tools band: hairline + inlined tech-stack logos, centered
+    if TOOLS:
+        div_y = H - M - tools_band + 12
+        o.append(f'<line x1="{M+PAD_L}" y1="{div_y}" x2="{W-M-PAD_R}" y2="{div_y}" stroke="{p["border"]}"/>')
+        start_x = (W - tools_w) / 2
+        icon_y = div_y + (tools_band - 12 - ICON) / 2
+        for i, (name, inner) in enumerate(TOOLS):
+            x = start_x + i * (ICON + IGAP)
+            o.append(f'<svg x="{x:.1f}" y="{icon_y:.1f}" width="{ICON}" height="{ICON}" viewBox="0 0 128 128">{inner}</svg>')
 
     o.append('</svg>')
     return "\n".join(o)

@@ -10,6 +10,7 @@ on:
       - "today.py"
       - "build_svg.py"
       - "face.json"
+      - "tools.json"
       - ".github/workflows/main.yml"
 
 permissions:
