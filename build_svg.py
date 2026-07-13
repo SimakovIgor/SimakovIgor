@@ -32,12 +32,14 @@ PAL = {
                  accent="#f2adc0", accent2="#c3b1de", num="#e9a86b",
                  ok="#7fd6a9", bad="#ef7a72", baron="#f2adc0", baroff="#2f2838",
                  shadow="#050409", shadow_op=0.5,
+                 aura0=0.26, aura1=0.11, csh="#030206", csh_op=0.55,
                  vmin=0.60, vmax=1.0, smul=1.05),
     "light": dict(card="#fbf7f4", card2="#f4ecee", border="#e6d8dd",
                   ink="#241d29", dim="#6c6172", faint="#a99ba6",
                   accent="#c25e86", accent2="#7a5fb0", num="#c07a2e",
                   ok="#2f9e6b", bad="#d64a3e", baron="#c25e86", baroff="#e6d8dd",
                   shadow="#7a5fb0", shadow_op=0.20,
+                  aura0=0.16, aura1=0.07, csh="#6a4f96", csh_op=0.22,
                   vmin=0.0, vmax=0.60, smul=1.15),
 }
 
@@ -177,6 +179,12 @@ def build(theme):
         f'<filter id="soft" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="13"/></filter>'
         f'<filter id="fea" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4.5"/></filter>'
         f'<filter id="cg" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.2"/></filter>'
+        f'<filter id="aur" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="20"/></filter>'
+        f'<filter id="csh" x="-120%" y="-160%" width="340%" height="420%"><feGaussianBlur stdDeviation="5.5"/></filter>'
+        f'<radialGradient id="aura" cx="50%" cy="46%" r="58%">'
+        f'<stop offset="0%" stop-color="{p["accent"]}" stop-opacity="{p["aura0"]}"/>'
+        f'<stop offset="52%" stop-color="{p["accent2"]}" stop-opacity="{p["aura1"]}"/>'
+        f'<stop offset="100%" stop-color="{p["accent2"]}" stop-opacity="0"/></radialGradient>'
         f'<mask id="feather" maskUnits="userSpaceOnUse" x="0" y="0" width="{W}" height="{H}">'
         f'<rect x="{M}" y="{M}" width="{W-2*M}" height="{H-2*M}" rx="16" fill="#fff" filter="url(#fea)"/></mask>'
         f'<style>'
@@ -192,7 +200,11 @@ def build(theme):
         f'.legR{{animation:stepR 2.4s ease-in-out infinite}}'
         f'@keyframes stepL{{0%,100%{{transform:translate(-1.6px,0)}}25%{{transform:translate(1.8px,-2.6px)}}50%{{transform:translate(-1.6px,0)}}}}'
         f'@keyframes stepR{{0%,50%{{transform:translate(-1.6px,0)}}75%{{transform:translate(1.8px,-2.6px)}}100%{{transform:translate(-1.6px,0)}}}}'
-        f'@media(prefers-reduced-motion:reduce){{.type,.tcur,.bob,.legL,.legR{{animation:none;transform:none;clip-path:none}}.pulse{{animation:none}}}}'
+        f'.aura{{animation:aura 4.8s ease-in-out infinite;transform-box:fill-box;transform-origin:center}}'
+        f'@keyframes aura{{0%,100%{{opacity:1;transform:scale(1)}}50%{{opacity:.82;transform:scale(1.035)}}}}'
+        f'.csh{{animation:csh 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center}}'
+        f'@keyframes csh{{0%,100%{{opacity:1;transform:scaleX(1)}}50%{{opacity:.6;transform:scaleX(.8)}}}}'
+        f'@media(prefers-reduced-motion:reduce){{.type,.tcur,.bob,.legL,.legR,.aura,.csh{{animation:none;transform:none;clip-path:none}}.pulse{{animation:none}}}}'
         f'</style></defs>')
 
     cx, cy, cw, ch = M, M, W - 2 * M, H - 2 * M
@@ -242,6 +254,14 @@ def build(theme):
         return best_c if best_len >= 2 else None
 
     seam = next((gc for r in reversed(ROWS[leg_start:]) if (gc := gap_center(r)) is not None), ascii_cols // 2)
+
+    # depth layers (behind the avatar): a soft colored halo lifts it off the flat
+    # panel, and a contact shadow under the feet grounds the walk. Both stay subtle.
+    acx = ascii_x + ascii_w / 2
+    acy = ascii_dy + ascii_h / 2
+    feet_y = ascii_dy + len(ROWS) * ALH - 1
+    o.append(f'<ellipse class="aura" cx="{acx:.1f}" cy="{acy:.1f}" rx="{ascii_w*0.60:.1f}" ry="{ascii_h*0.56:.1f}" fill="url(#aura)" filter="url(#aur)"/>')
+    o.append(f'<ellipse class="csh" cx="{acx:.1f}" cy="{feet_y:.1f}" rx="{ascii_w*0.30:.1f}" ry="6.5" fill="{p["csh"]}" fill-opacity="{p["csh_op"]}" filter="url(#csh)"/>')
 
     o.append('<g class="bob">')
     legL, legR = [], []
