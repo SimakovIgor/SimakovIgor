@@ -118,6 +118,7 @@ def main():
 
     stats = {
         "year": YEAR,
+        "built": datetime.datetime.utcnow().strftime("%Y-%m-%d"),
         "uptime": "10 yrs in IT",
         "email": os.environ.get("PROFILE_EMAIL", "simakoff30@gmail.com"),
         "repos": len(repos),

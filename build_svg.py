@@ -186,7 +186,11 @@ def build(theme):
         f'@keyframes tmove{{from{{transform:translateX(-{line_w:.0f}px)}}to{{transform:translateX(0)}}}}'
         f'.pulse{{animation:pulse 2.2s ease-in-out infinite}}'
         f'@keyframes blink{{50%{{opacity:0}}}}@keyframes pulse{{0%,100%{{opacity:1}}65%{{opacity:.25}}}}'
-        f'@media(prefers-reduced-motion:reduce){{.type,.tcur{{animation:none;transform:none;clip-path:none}}.pulse{{animation:none}}}}'
+        f'.bob{{animation:bob 4.6s ease-in-out infinite;transform-origin:center;transform-box:fill-box}}'
+        f'@keyframes bob{{0%,100%{{transform:translateY(0) rotate(0deg)}}30%{{transform:translateY(-3px) rotate(-.5deg)}}70%{{transform:translateY(-1.5px) rotate(.5deg)}}}}'
+        f'.bob text{{animation:breathe 4.6s ease-in-out infinite}}'
+        f'@keyframes breathe{{0%,100%{{opacity:1}}50%{{opacity:.86}}}}'
+        f'@media(prefers-reduced-motion:reduce){{.type,.tcur,.bob,.bob text{{animation:none;transform:none;clip-path:none}}.pulse{{animation:none}}}}'
         f'</style></defs>')
 
     cx, cy, cw, ch = M, M, W - 2 * M, H - 2 * M
@@ -203,12 +207,17 @@ def build(theme):
     for i, col in enumerate(["#ec6a5e", "#f4bf4f", "#61c554"]):
         o.append(f'<circle cx="{cx+22+i*18}" cy="{ty}" r="6" fill="{col}"/>')
     o.append(T(cx + cw / 2, ty + 4.5, [("simakov@bali", p["ink"]), ("  : ~/dev", p["dim"])], 12.5, anchor="middle"))
-    o.append(f'<circle class="pulse" cx="{cx+cw-152}" cy="{ty}" r="4" fill="{p["ok"]}"/>')
-    o.append(T(cx + cw - 140, ty + 4, [("live · rebuilt daily", p["faint"])], 11))
+    built = S("built", "")
+    hdr = f"live · updated {built}" if built else "live · rebuilt daily"
+    hx = cx + cw - 22
+    o.append(T(hx, ty + 4, [(hdr, p["faint"])], 11, anchor="end"))
+    o.append(f'<circle class="pulse" cx="{hx - len(hdr) * 6.35 - 11:.0f}" cy="{ty}" r="4" fill="{p["ok"]}"/>')
 
-    # ascii (colored per char)
+    # ascii (colored per char) — gently floats as one "creature"
+    o.append('<g class="bob">')
     for i, r in enumerate(ROWS):
         o.append(f'<text x="{ascii_x:.1f}" y="{ascii_dy+ALH*(i+1):.1f}" font-size="{AF}" xml:space="preserve">{ascii_tspans(r, p)}</text>')
+    o.append('</g>')
     o.append(T(ascii_x + ascii_w / 2, ascii_dy + len(ROWS) * ALH + 15, [("@SIMAKOVIGOR · BALI", p["faint"])], 10, anchor="middle", ls="2"))
 
     o.append(f'<g transform="translate({fetch_x:.1f},{fetch_dy:.1f})">')
