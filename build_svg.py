@@ -186,11 +186,13 @@ def build(theme):
         f'@keyframes tmove{{from{{transform:translateX(-{line_w:.0f}px)}}to{{transform:translateX(0)}}}}'
         f'.pulse{{animation:pulse 2.2s ease-in-out infinite}}'
         f'@keyframes blink{{50%{{opacity:0}}}}@keyframes pulse{{0%,100%{{opacity:1}}65%{{opacity:.25}}}}'
-        f'.bob{{animation:bob 4.6s ease-in-out infinite;transform-origin:center;transform-box:fill-box}}'
-        f'@keyframes bob{{0%,100%{{transform:translateY(0) rotate(0deg)}}30%{{transform:translateY(-3px) rotate(-.5deg)}}70%{{transform:translateY(-1.5px) rotate(.5deg)}}}}'
-        f'.bob text{{animation:breathe 4.6s ease-in-out infinite}}'
-        f'@keyframes breathe{{0%,100%{{opacity:1}}50%{{opacity:.86}}}}'
-        f'@media(prefers-reduced-motion:reduce){{.type,.tcur,.bob,.bob text{{animation:none;transform:none;clip-path:none}}.pulse{{animation:none}}}}'
+        f'.bob{{animation:bob 2.4s ease-in-out infinite;transform-origin:center;transform-box:fill-box}}'
+        f'@keyframes bob{{0%,100%{{transform:translateY(0) rotate(-.4deg)}}50%{{transform:translateY(-2px) rotate(.4deg)}}}}'
+        f'.legL{{animation:stepL 2.4s ease-in-out infinite}}'
+        f'.legR{{animation:stepR 2.4s ease-in-out infinite}}'
+        f'@keyframes stepL{{0%,100%{{transform:translate(-1.6px,0)}}25%{{transform:translate(1.8px,-2.6px)}}50%{{transform:translate(-1.6px,0)}}}}'
+        f'@keyframes stepR{{0%,50%{{transform:translate(-1.6px,0)}}75%{{transform:translate(1.8px,-2.6px)}}100%{{transform:translate(-1.6px,0)}}}}'
+        f'@media(prefers-reduced-motion:reduce){{.type,.tcur,.bob,.legL,.legR{{animation:none;transform:none;clip-path:none}}.pulse{{animation:none}}}}'
         f'</style></defs>')
 
     cx, cy, cw, ch = M, M, W - 2 * M, H - 2 * M
@@ -213,10 +215,45 @@ def build(theme):
     o.append(T(hx, ty + 4, [(hdr, p["faint"])], 11, anchor="end"))
     o.append(f'<circle class="pulse" cx="{hx - len(hdr) * 6.35 - 11:.0f}" cy="{ty}" r="4" fill="{p["ok"]}"/>')
 
-    # ascii (colored per char) — gently floats as one "creature"
+    # ascii (colored per char) — the "creature" gently bobs as it walks in place,
+    # with the two feet (bottom rows, split at the gap between them) stepping alternately.
+    def txt(x, cells):
+        return f'<text x="{x:.1f}" y="{yy:.1f}" font-size="{AF}" xml:space="preserve">{ascii_tspans(cells, p)}</text>'
+
+    LEG_ROWS = 3                                  # bottom rows that hold the legs/feet
+    leg_start = max(0, len(ROWS) - LEG_ROWS)
+
+    def gap_center(r):                            # midpoint of the widest interior space run
+        nz = [i for i, c in enumerate(r) if c[0] != " "]
+        if len(nz) < 2:
+            return None
+        lo, hi = nz[0], nz[-1]
+        best_len, best_c, run, start = 0, None, 0, lo
+        for i in range(lo, hi + 2):
+            blank = i <= hi and r[i][0] == " "
+            if blank:
+                if run == 0:
+                    start = i
+                run += 1
+            else:
+                if run > best_len:
+                    best_len, best_c = run, (start + i - 1) // 2
+                run = 0
+        return best_c if best_len >= 2 else None
+
+    seam = next((gc for r in reversed(ROWS[leg_start:]) if (gc := gap_center(r)) is not None), ascii_cols // 2)
+
     o.append('<g class="bob">')
+    legL, legR = [], []
     for i, r in enumerate(ROWS):
-        o.append(f'<text x="{ascii_x:.1f}" y="{ascii_dy+ALH*(i+1):.1f}" font-size="{AF}" xml:space="preserve">{ascii_tspans(r, p)}</text>')
+        yy = ascii_dy + ALH * (i + 1)
+        if i >= leg_start:                        # split this row into left foot / right foot
+            legL.append(txt(ascii_x, r[:seam]))
+            legR.append(txt(ascii_x + seam * ACW, r[seam:]))
+        else:
+            o.append(txt(ascii_x, r))
+    o.append(f'<g class="legL">{"".join(legL)}</g>')
+    o.append(f'<g class="legR">{"".join(legR)}</g>')
     o.append('</g>')
     o.append(T(ascii_x + ascii_w / 2, ascii_dy + len(ROWS) * ALH + 15, [("@SIMAKOVIGOR · BALI", p["faint"])], 10, anchor="middle", ls="2"))
 

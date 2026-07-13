@@ -1,6 +1,6 @@
 from PIL import Image
 import numpy as np, json, colorsys
-W=64; L,T,R,B=0.05,0.02,0.95,0.9; CR=0.5; EDGE=4; SCALE=0.30; FLOOR=0.055; GAMMA=0.9
+W=64; L,T,R,B=0.05,0.02,0.95,0.9; CR=0.62; EDGE=4; SCALE=0.30; FLOOR=0.055; GAMMA=0.9  # CR=0.62 keeps the true egg/oval aspect (0.5 stretched it into a ball)
 ramp="@%#*+=-:. "
 im=Image.open("avatar.png").convert("RGB"); iw,ih=im.size
 im=im.crop((int(L*iw),int(T*ih),int(R*iw),int(B*ih)))
