@@ -54,7 +54,7 @@ FCW = FF * 0.60
 
 ascii_cols = max(len(r) for r in ROWS)
 ascii_w = ascii_cols * ACW
-ascii_h = len(ROWS) * ALH + 22
+ascii_h = len(ROWS) * ALH + 6
 
 def esc(s):
     return html.escape(s, quote=True)
@@ -104,16 +104,14 @@ def fetch_ops(p):
     def sec(label, note=""):
         nonlocal y
         y += 5
-        segs = [(label, p["accent2"])] + ([(note, p["faint"])] if note else [])
+        segs = [(label, p["accent"])] + ([(note, p["faint"])] if note else [])
         ops.append(T(XL, y, segs, 10.5, ls="2")); y += FLH
-
-    ops.append(T(XL, y, [("igor", p["accent"]), ("@", p["faint"]), ("bali", p["accent"])], FF, "600")); rt(XL, 9); y += FLH
-    ops.append(T(XL, y, [("────────────────────────────────────────", p["faint"])], FF)); rt(XL, 40); y += FLH
 
     fields = [
         ("role", [("Tech / Team Lead", p["accent"]), (" · Mentor", p["ink"])], 24),
         ("company", [("Uzum.uz", p["ink"])], 7),
         ("email", [(EMAIL, p["ink"])], len(EMAIL)),
+        ("telegram", [("@Igoresha_Simakov", p["ink"])], 17),
         ("location", [("Bali", p["ink"]), ("   ·   UTC+8", p["faint"])], 16),
         ("uptime", [("10", p["num"]), (" yrs in IT", p["faint"])], 12),
         ("editor", [("IntelliJ IDEA", p["ink"]), (" · ", p["faint"]), ("Claude Code", p["ink"])], 27),
@@ -131,13 +129,13 @@ def fetch_ops(p):
     added, removed = S("added", 512880), S("removed", 76902)
     net, repos = S("net", added - removed), S("repos", 27)
     commits = S("commits", 2155)
-    lines_v = [(f"+{added:,}", p["ok"]), (" / ", p["faint"]), (f"−{removed:,}", p["bad"])]
+    lines_v = [(f"+{added:,}", p["num"]), (" / ", p["faint"]), (f"−{removed:,}", p["num"])]
     netstr = f"+{net:,}" if net >= 0 else f"−{abs(net):,}"
-    sec("C O D E", "   — auto · rebuilt daily")
+    sec("C O D E")
     row([("commits", p["dim"])], [(f"{commits:,}", p["num"]), (" this year", p["faint"])]); rt(XV, len(f"{commits:,}") + 10)
     row([("lines", p["dim"])], lines_v); rt(XV, len(f"+{added:,}") + len(f"−{removed:,}") + 3)
-    row([("net", p["dim"])], [(netstr, p["ok"] if net >= 0 else p["bad"]), (f" across {repos} repos", p["faint"])]); rt(XV, len(netstr) + len(f" across {repos} repos"))
-    row([("activity", p["dim"])], [(S("activity", "▁▂▃▅▂▄▆█▅▃▄▆▇█▆▄▂▃▅▇█▆▄▃▂▄▅"), p["ok"])]); rt(XV, 27)
+    row([("net", p["dim"])], [(netstr, p["num"]), (f" across {repos} repos", p["faint"])]); rt(XV, len(netstr) + len(f" across {repos} repos"))
+    row([("activity", p["dim"])], [(S("activity", "▁▂▃▅▂▄▆█▅▃▄▆▇█▆▄▂▃▅▇█▆▄▃▂▄▅"), p["dim"])]); rt(XV, 27)
 
     stars, followers = S("stars", 53), S("followers", 10)
     pinned, pstars = S("pinned_name", "java-roadmap"), S("pinned_stars", 18)
@@ -151,7 +149,7 @@ def fetch_ops(p):
     prompt = 'git commit -m "another day in paradise"'
     full = "➜ ~/dev " + prompt
     ncur = len(full)
-    ops.append(T(XL, y, [("➜", p["ok"]), (" ~/dev ", p["dim"]), (prompt, p["ink"])], FF, cls="type"))
+    ops.append(T(XL, y, [("➜", p["accent"]), (" ~/dev ", p["dim"]), (prompt, p["ink"])], FF, cls="type"))
     rt(XL, ncur + 1)
     cur = (XL + ncur * FCW, y - FF + 1, ncur)
     return ops, maxr[0], y + 6, cur
@@ -272,7 +270,6 @@ def build(theme):
     o.append(f'<g class="legL">{"".join(legL)}</g>')
     o.append(f'<g class="legR">{"".join(legR)}</g>')
     o.append('</g>')
-    o.append(T(ascii_x + ascii_w / 2, ascii_dy + len(ROWS) * ALH + 15, [("@SIMAKOVIGOR · BALI", p["faint"])], 10, anchor="middle", ls="2"))
 
     o.append(f'<g transform="translate({fetch_x:.1f},{fetch_dy:.1f})">')
     o.extend(fops)
