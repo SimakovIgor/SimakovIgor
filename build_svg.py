@@ -209,7 +209,7 @@ def hero(p):
         ("BUILD", [("pixel-buddy", p["accent"]), (" · a pet for Claude Code", p["ink"])]),
         ("WRITE", [(str(habr.get("articles", 9)), p["num"]), (" articles on Habr · ", p["ink"]),
                    (short(habr.get("reads", 92000)), p["num"]), (" reads", p["ink"])]),
-        ("MENTOR", [("18+", p["num"]), (" mentees on GetMentor", p["ink"])]),
+        ("MENTOR", [("21", p["num"]), (" mentees on OpenMentor", p["ink"])]),
         ("REACH", [("@igoresha_simakov", p["ink"]), (" · ", p["faint"]), ("simakoff30@gmail.com", p["ink"])]),
     ]
     for i, (lab, val) in enumerate(rows):
@@ -317,7 +317,7 @@ CONTACTS = [
     ("in", "LinkedIn", "igor-simakov", "#0A66C2",
      '<rect x="7.2" y="10.2" width="2.2" height="6.6" fill="#fff"/><circle cx="8.3" cy="7.9" r="1.3" fill="#fff"/>'
      '<path d="M11.2 10.2h2.1v1c.4-.7 1.2-1.2 2.3-1.2 1.8 0 2.5 1.1 2.5 3v3.8h-2.2v-3.4c0-.9-.3-1.5-1.1-1.5s-1.4.6-1.4 1.5v3.4h-2.2z" fill="#fff"/>'),
-    ("mentor", "Mentoring", "18+ on GetMentor", "#9466C4",
+    ("mentor", "Mentoring", "21 on OpenMentor", "#9466C4",
      '<path d="M12 7l6.5 3.2L12 13.4 5.5 10.2z" fill="#fff"/><path d="M8.3 11.8v2.6c0 .9 1.7 2 3.7 2s3.7-1.1 3.7-2v-2.6L12 13.6z" fill="#fff"/>'
      '<path d="M18.5 10.2v3.4" stroke="#fff" stroke-width="1.1" stroke-linecap="round"/>'),
 ]
