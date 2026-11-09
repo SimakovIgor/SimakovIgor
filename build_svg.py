@@ -1,297 +1,358 @@
 #!/usr/bin/env python3
-"""simakov@bali neofetch card -> self-contained SVG (renders in <img> on GitHub).
-Avatar ASCII is colored per-character from the real avatar pixels. Content is
-visible by default; motion (blink + typing) only enhances, never hides."""
-import html, json, colorsys
+"""Profile cards -> self-contained SVGs (render inside <img> on GitHub), dark and light.
+  dark.svg / light.svg            hero: a year of contributions as a 3D city, live GitHub stats, who I am
+  cards/buddy-*.svg               pixel-buddy
+  cards/habr-*.svg                Habr articles and reads
+  cards/roadmap-*.svg             java-roadmap
+  cards/contact-*.svg             contact buttons for Say hi
+Numbers come from stats.json (today.py). Text is visible without animation; motion only
+adds to it and stops under prefers-reduced-motion. Standard library only."""
+import datetime, html, json, math, os, re
 
-ROWS = json.load(open("face.json"))              # [[ [char, "#hex"|null], ... ], ...]
-try:
-    STATS = json.load(open("stats.json"))
-except FileNotFoundError:
-    STATS = {}
-try:
-    TOOLS = json.load(open("tools.json"))     # [[name, inner_svg], ...]
-except FileNotFoundError:
-    TOOLS = []
-
-def S(k, d):
-    return STATS.get(k, d)
-
-EMAIL = S("email", "simakoff30@gmail.com")
-
-def fmt(n):
-    return f"{n:,}".replace(",", ",")
-
-def bar_segs(pct, on_col, off_col):
-    on = max(1, min(10, round(pct / 10)))
-    return [("█" * on, on_col), ("█" * (10 - on), off_col)] if on < 10 else [("█" * 10, on_col)]
+MONO = "ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace"
+SANS = "-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif"
 
 PAL = {
-    "dark": dict(card="#14111c", card2="#191521", border="#2a2434",
-                 ink="#e7e2ef", dim="#9a92ab", faint="#6a6379",
-                 accent="#f2adc0", accent2="#c3b1de", num="#e9a86b",
-                 ok="#7fd6a9", bad="#ef7a72", baron="#f2adc0", baroff="#2f2838",
-                 shadow="#050409", shadow_op=0.5,
-                 csh="#030206", csh_op=0.5, lift_col="#000000", lift_op=0.55,
-                 vmin=0.60, vmax=1.0, smul=1.05),
-    "light": dict(card="#fbf7f4", card2="#f4ecee", border="#e6d8dd",
-                  ink="#241d29", dim="#6c6172", faint="#a99ba6",
-                  accent="#c25e86", accent2="#7a5fb0", num="#c07a2e",
-                  ok="#2f9e6b", bad="#d64a3e", baron="#c25e86", baroff="#e6d8dd",
-                  shadow="#7a5fb0", shadow_op=0.20,
-                  csh="#6a4f96", csh_op=0.22, lift_col="#2a2233", lift_op=0.30,
-                  vmin=0.0, vmax=0.60, smul=1.15),
+    "dark": dict(card="#14111c", card2="#191521", border="#2a2434", ink="#ece6f3", dim="#a39bb3",
+                 faint="#6d6680", accent="#f2adc0", accent2="#c3b1de", num="#e9a86b", ok="#7fd6a9",
+                 tile="#221d2c", side1=0.28, side2=0.45,
+                 lv=["#4a3f63", "#7a62a6", "#b88fd0", "#f2adc0"], sheen=0.10),
+    "light": dict(card="#fbf7f4", card2="#f4ecee", border="#e6d8dd", ink="#241d29", dim="#6c6172",
+                  faint="#9d8f9a", accent="#c25e86", accent2="#7a5fb0", num="#b86f22", ok="#2f9e6b",
+                  tile="#efe5e9", side1=0.16, side2=0.30,
+                  lv=["#d9c9ec", "#b597dc", "#9466c4", "#c25e86"], sheen=0.55),
 }
 
-M = 30
-PAD_L, PAD_R = 12, 28
-TITLE_H = 44
-AF = 9.0
-ACW, ALH = AF * 0.60, AF * 1.03
-FF = 13.5
-FLH = 20.5
-FCW = FF * 0.60
+CAREER_START = 2016
+STATS = json.load(open("stats.json")) if os.path.exists("stats.json") else {}
 
-ascii_cols = max(len(r) for r in ROWS)
-ascii_w = ascii_cols * ACW
-ascii_h = len(ROWS) * ALH + 6
+HABR_SHORT = {
+    "814485": "JUnit 5 + Mockito + AssertJ", "1092932": "Полгода не пишем код руками",
+    "1041296": "Десять лет писал код руками", "968058": "IN (:ids) и Plan Cache",
+    "1039862": "SXSSFWorkbook без dispose()", "1037972": "История одного // todo",
+    "1046417": "Переименовал две колонки", "1032902": "GitPulse: метрики команды",
+    "1044626": "Black-box тесты на Java",
+}
+
+CAT = [["..b.....b.", "..bc...cb.", "s.bbbbbbb.", "s.bebbbeb.", ".scbbmbbc.", "...sbbbs.."],
+       ["..b.....b.", "..bc...cb.", "..bbbbbbb.", "..bebbbeb.", "s.cbbmbbc.", ".s.sbbbs.."]]
+CAT_PAL = dict(b="#f2a65a", s="#c97b35", e="#1d1b26", c="#ff8fab", m="#5a2a3a")
+
 
 def esc(s):
     return html.escape(s, quote=True)
 
-def adj(hexc, p):
-    r = int(hexc[1:3], 16) / 255; g = int(hexc[3:5], 16) / 255; b = int(hexc[5:7], 16) / 255
-    h, s, v = colorsys.rgb_to_hsv(r, g, b)
-    v = max(v, p["vmin"])          # dark: raise dark colors so they read on dark bg
-    v = min(v, p["vmax"])          # light: cap bright colors so they read on cream
-    s = min(1.0, s * p["smul"])
-    r, g, b = colorsys.hsv_to_rgb(h, s, v)
-    return "#%02x%02x%02x" % (int(r * 255), int(g * 255), int(b * 255))
 
-def T(x, y, segs, size, weight="400", anchor=None, ls=None, cls=None):
+def T(x, y, segs, size, weight=400, anchor=None, family=MONO, ls=None, cls=None):
     a = f' text-anchor="{anchor}"' if anchor else ""
     l = f' letter-spacing="{ls}"' if ls else ""
     c = f' class="{cls}"' if cls else ""
-    tspans = "".join(f'<tspan fill="{col}">{esc(t)}</tspan>' for t, col in segs)
-    return f'<text{c} x="{x:.1f}" y="{y:.1f}" font-size="{size}" font-weight="{weight}"{a}{l} xml:space="preserve">{tspans}</text>'
+    sp = "".join(f'<tspan fill="{col}">{esc(t)}</tspan>' for t, col in segs)
+    return (f'<text{c} x="{x:.1f}" y="{y:.1f}" font-family="{family}" font-size="{size}" '
+            f'font-weight="{weight}"{a}{l} xml:space="preserve">{sp}</text>')
 
-def ascii_tspans(row, p):
-    parts, buf, cur = [], "", "INIT"
-    def flush():
-        nonlocal buf, cur
-        if not buf:
-            return
-        f = "" if cur is None else f' fill="{cur}"'
-        parts.append(f'<tspan{f}>{esc(buf)}</tspan>')
-        buf = ""
-    for ch, col in row:
-        ac = None if col is None else adj(col, p)
-        if ac == cur:
-            buf += ch
-        else:
-            flush(); cur = ac; buf = ch
-    flush()
-    return "".join(parts)
 
-def fetch_ops(p):
-    ops, y = [], FF
-    XL, XV, XL2, XV2 = 0, 92, 168, 246
-    maxr = [0.0]
-    def rt(x, n): maxr[0] = max(maxr[0], x + n * FCW)
-    def row(k, v, kw=None):
-        nonlocal y
-        ops.append(T(XL, y, k, FF)); ops.append(T(XV, y, v, FF)); y += FLH
-    def sec(label, note=""):
-        nonlocal y
-        y += 5
-        segs = [(label, p["accent"])] + ([(note, p["faint"])] if note else [])
-        ops.append(T(XL, y, segs, 10.5, ls="2")); y += FLH
+def short(n):
+    if n >= 1_000_000:
+        return f"{n / 1_000_000:.1f}M"
+    if n >= 1_000:
+        return f"{round(n / 1_000)}K"
+    return str(n)
 
-    fields = [
-        ("role", [("Tech / Team Lead", p["accent"]), (" · Mentor", p["ink"])], 24),
-        ("company", [("Uzum.uz", p["ink"])], 7),
-        ("email", [(EMAIL, p["ink"])], len(EMAIL)),
-        ("telegram", [("@Igoresha_Simakov", p["ink"])], 17),
-        ("location", [("Bali", p["ink"]), ("   ·   UTC+8", p["faint"])], 16),
-        ("uptime", [("10", p["num"]), (" yrs in IT", p["faint"])], 12),
-        ("editor", [("IntelliJ IDEA", p["ink"]), (" · ", p["faint"]), ("Claude Code", p["ink"])], 27),
+
+def pixels(rows, pal, x0, y0, px):
+    out = []
+    for y, r in enumerate(rows):
+        x = 0
+        while x < len(r):
+            c = r[x]
+            if c == ".":
+                x += 1
+                continue
+            e = x
+            while e + 1 < len(r) and r[e + 1] == c:
+                e += 1
+            out.append(f'<rect x="{x0 + x * px:.1f}" y="{y0 + y * px:.1f}" width="{(e - x + 1) * px:.1f}" '
+                       f'height="{px:.1f}" fill="{pal[c]}"/>')
+            x = e + 1
+    return "".join(out)
+
+
+def svg_open(w, h, label, style):
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" '
+            f'role="img" aria-label="{esc(label)}"><style>{style}'
+            f'@media(prefers-reduced-motion:reduce){{*{{animation:none!important}}}}</style>')
+
+
+def frame(p, w, h, title_bar=False):
+    o = [f'<rect x="0.5" y="0.5" width="{w - 1}" height="{h - 1}" rx="14" fill="{p["card"]}" stroke="{p["border"]}"/>']
+    if title_bar:
+        o.append(f'<path d="M0.5 40.5 V14.5 a14 14 0 0 1 14 -14 H{w - 14.5} a14 14 0 0 1 14 14 V40.5 Z" '
+                 f'fill="{p["card2"]}" stroke="{p["border"]}"/>')
+    return o
+
+
+def mix(c1, c2, t):
+    a = [int(c1[i:i + 2], 16) for i in (1, 3, 5)]
+    b = [int(c2[i:i + 2], 16) for i in (1, 3, 5)]
+    return "#%02x%02x%02x" % tuple(round(x + (y - x) * t) for x, y in zip(a, b))
+
+
+def city(p, ox, oy, a=4.7, b=3.05, hmax=92):
+    weeks = [list(w) for w in (STATS.get("days") or [[0] * 7] * 53)]
+    pad = 7 - len(weeks[0])
+    weeks[0] = [None] * pad + weeks[0]
+    weeks[-1] = weeks[-1] + [None] * (7 - len(weeks[-1]))
+    start = datetime.date.fromisoformat(STATS.get("since", "2025-11-09")) - datetime.timedelta(days=pad)
+    nz = sorted(c for w in weeks for c in w if c)
+    hi = nz[-1] if nz else 1
+    qs = [nz[int(len(nz) * f)] for f in (0.25, 0.5, 0.75)] if nz else [1, 1, 1]
+
+    def height(c):
+        return 2 + math.sqrt(c / hi) * hmax
+
+    cells, last, peak = [], None, None
+    for wi, w in enumerate(weeks):
+        for di, c in enumerate(w):
+            if c is None:
+                continue
+            cells.append((wi + di, wi, di, c))
+            last = (wi, di, c)
+            if c and (peak is None or c > peak[2]):
+                peak = (wi, di, c)
+    o = []
+    for _, wi, di, c in sorted(cells):
+        x, y = ox + (wi - di) * a, oy + (wi + di) * b
+        o.append(f'<path d="M{x:.1f} {y:.1f}l{a} {b}l{-a} {b}l{-a} {-b}z" fill="{p["tile"]}"/>')
+        if not c:
+            continue
+        top = p["lv"][sum(c > q for q in qs)]
+        h = height(c)
+        o.append(f'<g class="rise" style="animation-delay:{0.35 + wi * 0.028:.2f}s">'
+                 f'<path d="M{x - a:.1f} {y + b - h:.1f}l{a} {b}v{h:.1f}l{-a} {-b}z" fill="{mix(top, "#000000", p["side1"])}"/>'
+                 f'<path d="M{x:.1f} {y + 2 * b - h:.1f}l{a} {-b}v{h:.1f}l{-a} {b}z" fill="{mix(top, "#000000", p["side2"])}"/>'
+                 f'<path d="M{x:.1f} {y - h:.1f}l{a} {b}l{-a} {b}l{-a} {-b}z" fill="{top}"/></g>')
+
+    ang = math.degrees(math.atan2(b, a))
+    firsts = [wi for wi in range(1, len(weeks)) if (start + datetime.timedelta(days=7 * wi)).day <= 7]
+    for wi in firsts[::2]:
+        d = start + datetime.timedelta(days=7 * wi)
+        x, y = ox + (wi - 7) * a - 7, oy + (wi + 7) * b + 15
+        o.append(f'<text transform="translate({x:.1f} {y:.1f}) rotate({ang:.1f})" font-family="{MONO}" font-size="9.5" '
+                 f'fill="{p["faint"]}">{d.strftime("%b")}</text>')
+
+    late = []
+    if peak:
+        wi, di, c = peak
+        x, y = ox + (wi - di) * a, oy + (wi + di) * b - height(c)
+        ty = 78
+        when = start + datetime.timedelta(days=7 * wi + di)
+        day = f"{when.day} {when:%b}"
+        label = [("peak ", p["faint"]), (str(c), p["num"]), (f" · {day}", p["faint"])]
+        lw = sum(len(t) for t, _ in label) * 6.6
+        anchor_end = x + 6 + lw > 316
+        late.append(f'<path d="M{x:.1f} {y - 3:.1f} V{ty + 5}" stroke="{p["faint"]}" stroke-dasharray="1.5 2.5"/>'
+                    f'<circle cx="{x:.1f}" cy="{y - 3:.1f}" r="1.8" fill="{p["num"]}"/>')
+        late.append(T(x - 6 if anchor_end else x + 6, ty + 4, label, 11, anchor="end" if anchor_end else None))
+    if last:
+        wi, di, c = last
+        x, y = ox + (wi - di) * a, oy + (wi + di) * b + b - (height(c) if c else 0)
+        late.append(f'<circle class="pulse" cx="{x:.1f}" cy="{y - 7:.1f}" r="3" fill="{p["ok"]}"/>')
+    o.append(f'<g class="late">{"".join(late)}</g>')
+    return "".join(o)
+
+
+def hero(p):
+    W, H = 840, 500
+    years = int(STATS.get("built", "2026")[:4]) - CAREER_START
+    habr = STATS.get("habr") or {}
+    style = (f'.pulse{{animation:pulse 2.2s ease-in-out infinite}}@keyframes pulse{{0%,100%{{opacity:1}}65%{{opacity:.25}}}}'
+             f'.rise{{transform-box:fill-box;transform-origin:50% 100%;animation:rise .8s cubic-bezier(.2,.9,.25,1) both}}'
+             f'@keyframes rise{{from{{transform:scaleY(.04)}}}}'
+             f'.late{{animation:late .4s ease-out 2.2s both}}@keyframes late{{from{{opacity:0}}}}')
+    o = [svg_open(W, H, "Igor Simakov, Java backend lead: a year of contributions, live GitHub stats and what I do", style)]
+    o += frame(p, W, H, title_bar=True)
+    for i, c in enumerate(("#ec6a5e", "#f4bf4f", "#61c554")):
+        o.append(f'<circle cx="{22 + i * 18}" cy="20.5" r="6" fill="{c}"/>')
+    o.append(T(W / 2, 25, [("simakov@bali", p["ink"]), (": ~", p["dim"])], 12.5, anchor="middle"))
+    hdr = f"live · updated {STATS.get('built', '')}".strip()
+    o.append(T(W - 22, 25, [(hdr, p["faint"])], 11, anchor="end"))
+    o.append(f'<circle class="pulse" cx="{W - 22 - len(hdr) * 6.6 - 14:.0f}" cy="20.5" r="4" fill="{p["ok"]}"/>')
+
+    o.append(city(p, ox=56, oy=120))
+    L, LV = 26, 104
+    o.append(T(L, 344, [(f"{STATS.get('contributions', 0):,}", p["num"])], 26, 700, family=SANS))
+    o.append(T(L, 364, [("contributions in the last 12 months", p["dim"])], 11.5))
+    langs = " · ".join(f"{n} {v}%" for n, v in STATS.get("langs", []))
+    stat_rows = [
+        ("COMMITS", [(f"{STATS.get('commits', 0):,}", p["num"]), (f" in {STATS.get('year', '')}", p["faint"])]),
+        ("LINES", [(f"+{STATS.get('added', 0):,}", p["num"]), (" / ", p["faint"]),
+                   (f"−{STATS.get('removed', 0):,}", p["num"])]),
+        ("NET", [(f"{STATS.get('net', 0):+,}".replace("-", "−"), p["num"]),
+                 (f" across {STATS.get('repos', 0)} repos", p["faint"])]),
+        ("GITHUB", [(f"{STATS.get('stars', 0)}", p["num"]), (" stars · ", p["faint"]),
+                    (f"{STATS.get('followers', 0)}", p["num"]), (" followers", p["faint"])]),
+        ("LANGS", [(langs, p["ink"])]),
     ]
-    for k, v, n in fields:
-        row([(k, p["dim"])], v); rt(XV, n)
+    for i, (lab, val) in enumerate(stat_rows):
+        y = 396 + i * 21
+        o.append(T(L, y, [(lab, p["accent2"])], 10, 600, ls="1.4"))
+        o.append(T(LV, y, val, 12.5))
 
-    l1n, l1p = S("lang1_name", "Java"), S("lang1_pct", 81)
-    l2n, l2p = S("lang2_name", "Python"), S("lang2_pct", 6)
-    sec("S T A C K")
-    row([(l1n, p["dim"])], bar_segs(l1p, p["baron"], p["baroff"]) + [(f"  {l1p}%", p["num"])]); rt(XV, 14)
-    row([(l2n, p["dim"])], bar_segs(l2p, p["baron"], p["baroff"]) + [(f"  {l2p}%", p["num"])]); rt(XV, 14)
-    row([("focus", p["dim"])], [("Spring · Microservices · DDD", p["ink"])]); rt(XV, 28)
+    o.append(f'<path d="M324.5 64 V{H - 24}" stroke="{p["border"]}"/>')
+    X, V = 348, 426
+    o.append(T(X, 90, [("Igor Simakov", p["ink"])], 30, 700, family=SANS))
+    o.append(T(X, 118, [("Java backend lead", p["accent"]), (f" · {years} years in production", p["dim"])], 15))
+    rows = [
+        ("WORK", [("marketplace fulfillment @ ", p["ink"]), ("Uzum Market", p["accent"])]),
+        ("STACK", [("Java 21 · Spring · Kafka · PostgreSQL · K8s", p["ink"])]),
+        ("BUILD", [("pixel-buddy", p["accent"]), (" · a pet for Claude Code", p["ink"])]),
+        ("WRITE", [(str(habr.get("articles", 9)), p["num"]), (" articles on Habr · ", p["ink"]),
+                   (short(habr.get("reads", 92000)), p["num"]), (" reads", p["ink"])]),
+        ("MENTOR", [("18+", p["num"]), (" mentees on GetMentor", p["ink"])]),
+        ("REACH", [("@igoresha_simakov", p["ink"]), (" · ", p["faint"]), ("simakoff30@gmail.com", p["ink"])]),
+    ]
+    for i, (lab, val) in enumerate(rows):
+        y = 184 + i * 48
+        o.append(T(X, y, [(lab, p["accent2"])], 10.5, 600, ls="1.6"))
+        o.append(T(V, y, val, 13.5))
 
-    added, removed = S("added", 512880), S("removed", 76902)
-    net, repos = S("net", added - removed), S("repos", 27)
-    commits = S("commits", 2155)
-    lines_v = [(f"+{added:,}", p["num"]), (" / ", p["faint"]), (f"−{removed:,}", p["num"])]
-    netstr = f"+{net:,}" if net >= 0 else f"−{abs(net):,}"
-    sec("C O D E")
-    row([("commits", p["dim"])], [(f"{commits:,}", p["num"]), (" this year", p["faint"])]); rt(XV, len(f"{commits:,}") + 10)
-    row([("lines", p["dim"])], lines_v); rt(XV, len(f"+{added:,}") + len(f"−{removed:,}") + 3)
-    row([("net", p["dim"])], [(netstr, p["num"]), (f" across {repos} repos", p["faint"])]); rt(XV, len(netstr) + len(f" across {repos} repos"))
-    row([("activity", p["dim"])], [(S("activity", "▁▂▃▅▂▄▆█▅▃▄▆▇█▆▄▂▃▅▇█▆▄▃▂▄▅"), p["dim"])]); rt(XV, 27)
+    o.append("</svg>")
+    return "".join(o)
 
-    stars, followers = S("stars", 53), S("followers", 10)
-    pinned, pstars = S("pinned_name", "java-roadmap"), S("pinned_stars", 18)
-    sec("G I T H U B")
-    ops.append(T(XL, y, [("repos", p["dim"])], FF)); ops.append(T(XV, y, [(str(repos), p["num"])], FF))
-    ops.append(T(XL2, y, [("stars", p["dim"])], FF)); ops.append(T(XV2, y, [(str(stars), p["num"])], FF)); rt(XV2, 5); y += FLH
-    ops.append(T(XL, y, [("followers", p["dim"])], FF)); ops.append(T(XV, y, [(str(followers), p["num"])], FF))
-    ops.append(T(XL2, y, [("pinned", p["dim"])], FF)); ops.append(T(XV2, y, [(f"{pinned} ", p["ink"]), (f"★{pstars}", p["num"])], FF)); rt(XV2, len(pinned) + len(str(pstars)) + 2); y += FLH
 
-    y += 9
-    prompt = 'git commit -m "another day in paradise"'
-    full = "➜ ~/dev " + prompt
-    ncur = len(full)
-    ops.append(T(XL, y, [("➜", p["accent"]), (" ~/dev ", p["dim"]), (prompt, p["ink"])], FF, cls="type"))
-    rt(XL, ncur + 1)
-    cur = (XL + ncur * FCW, y - FF + 1, ncur)
-    return ops, maxr[0], y + 6, cur
+def card_head(p, w, h, label, title=None):
+    o = frame(p, w, h)
+    o.append(T(18, 28, [(label, p["accent2"])], 10, 600, ls="1.4"))
+    if title:
+        o.append(T(18, 54, [(title, p["ink"])], 18, 700, family=SANS))
+    return o
 
-def build(theme):
-    p = PAL[theme]
-    fops, fetch_w, fetch_h, (curx, cury, ncur) = fetch_ops(p)
-    content_h = max(ascii_h, fetch_h)
-    ascii_x = M + PAD_L
-    fetch_x = ascii_x + ascii_w + 30
-    body_top = M + TITLE_H + 24
-    ascii_dy = body_top + max(0, (content_h - ascii_h) / 2)
-    fetch_dy = body_top + max(0, (content_h - fetch_h) / 2)
-    ICON, IGAP = 27, 17
-    tools_w = len(TOOLS) * ICON + (len(TOOLS) - 1) * IGAP if TOOLS else 0
-    tools_band = 68 if TOOLS else 0
-    W = int(max(ascii_x + ascii_w, fetch_x + fetch_w, tools_w + 2 * (M + PAD_L)) + PAD_R + M)
-    H = int(body_top + content_h + PAD_R + M) + tools_band
-    line_w = ncur * FCW
 
-    o = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" '
-         f'font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace">']
-    o.append(
-        f'<defs>'
-        f'<filter id="soft" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="13"/></filter>'
-        f'<filter id="fea" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4.5"/></filter>'
-        f'<filter id="cg" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.2"/></filter>'
-        f'<filter id="csh" x="-120%" y="-160%" width="340%" height="420%"><feGaussianBlur stdDeviation="5.5"/></filter>'
-        f'<filter id="lift" x="-25%" y="-25%" width="155%" height="170%">'
-        f'<feGaussianBlur in="SourceAlpha" stdDeviation="3.2"/>'
-        f'<feOffset dx="2" dy="4.5" result="s"/>'
-        f'<feFlood flood-color="{p["lift_col"]}" flood-opacity="{p["lift_op"]}"/>'
-        f'<feComposite in2="s" operator="in"/>'
-        f'<feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>'
-        f'<mask id="feather" maskUnits="userSpaceOnUse" x="0" y="0" width="{W}" height="{H}">'
-        f'<rect x="{M}" y="{M}" width="{W-2*M}" height="{H-2*M}" rx="16" fill="#fff" filter="url(#fea)"/></mask>'
-        f'<style>'
-        f'.type{{animation:type 1.7s steps({ncur},end) .45s both}}'
-        f'@keyframes type{{from{{clip-path:inset(-3px 101% -3px -3px)}}to{{clip-path:inset(-3px -3px -3px -3px)}}}}'
-        f'.tcur{{animation:tmove 1.7s steps({ncur},end) .45s both,blink 1.05s steps(1) 2.15s infinite}}'
-        f'@keyframes tmove{{from{{transform:translateX(-{line_w:.0f}px)}}to{{transform:translateX(0)}}}}'
-        f'.pulse{{animation:pulse 2.2s ease-in-out infinite}}'
-        f'@keyframes blink{{50%{{opacity:0}}}}@keyframes pulse{{0%,100%{{opacity:1}}65%{{opacity:.25}}}}'
-        f'.bob{{animation:bob 2.4s ease-in-out infinite;transform-origin:center;transform-box:fill-box}}'
-        f'@keyframes bob{{0%,100%{{transform:translateY(0) rotate(-.4deg)}}50%{{transform:translateY(-2px) rotate(.4deg)}}}}'
-        f'.legL{{animation:stepL 2.4s ease-in-out infinite}}'
-        f'.legR{{animation:stepR 2.4s ease-in-out infinite}}'
-        f'@keyframes stepL{{0%,100%{{transform:translate(-1.6px,0)}}25%{{transform:translate(1.8px,-2.6px)}}50%{{transform:translate(-1.6px,0)}}}}'
-        f'@keyframes stepR{{0%,50%{{transform:translate(-1.6px,0)}}75%{{transform:translate(1.8px,-2.6px)}}100%{{transform:translate(-1.6px,0)}}}}'
-        f'.csh{{animation:csh 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center}}'
-        f'@keyframes csh{{0%,100%{{opacity:1;transform:scaleX(1)}}50%{{opacity:.6;transform:scaleX(.8)}}}}'
-        f'@media(prefers-reduced-motion:reduce){{.type,.tcur,.bob,.legL,.legR,.csh{{animation:none;transform:none;clip-path:none}}.pulse{{animation:none}}}}'
-        f'</style></defs>')
+def card_buddy(p):
+    w, h = 272, 168
+    repo = (STATS.get("featured") or {}).get("pixel-buddy") or {}
+    style = ('.walk{animation:walk 7s linear infinite}@keyframes walk{80%,100%{transform:translateX(178px)}}'
+             '.f0{animation:f0 .5s steps(1) infinite}@keyframes f0{50%{opacity:0}}'
+             '.f1{opacity:0;animation:f1 .5s steps(1) infinite}@keyframes f1{50%{opacity:1}}')
+    o = [svg_open(w, h, "pixel-buddy, a pixel pet for Claude Code", style)]
+    o += card_head(p, w, h, "CLAUDE CODE MOD", "pixel-buddy")
+    o.append(T(18, 76, [("A pixel pet in your footer.", p["dim"])], 12))
+    o.append(T(18, 93, [("Ship code, feed your buddy.", p["dim"])], 12))
+    o.append(f'<path d="M18 133.5 H254" stroke="{p["border"]}" stroke-dasharray="2 3"/>')
+    o.append('<rect x="232" y="125" width="8" height="8" rx="2" fill="#d9a066"/>'
+             '<rect x="234" y="127" width="2" height="2" fill="#6b3f1f"/><rect x="237" y="129" width="2" height="2" fill="#6b3f1f"/>')
+    o.append(f'<g transform="translate(18 112)"><g class="walk">'
+             f'<g class="f0" shape-rendering="crispEdges">{pixels(CAT[0], CAT_PAL, 0, 0, 3.5)}</g>'
+             f'<g class="f1" shape-rendering="crispEdges">{pixels(CAT[1], CAT_PAL, 0, 0, 3.5)}</g></g></g>')
+    o.append(T(18, 156, [(f"★ {repo.get('stars', 0)}", p["num"]), (f"  ·  {repo.get('lang', '')}", p["faint"])], 11.5))
+    o.append(T(254, 156, [("install →", p["accent"])], 11.5, anchor="end"))
+    o.append("</svg>")
+    return "".join(o)
 
-    cx, cy, cw, ch = M, M, W - 2 * M, H - 2 * M
-    # soft shadow halo — melts the card into the page background
-    o.append(f'<rect x="{cx}" y="{cy+4}" width="{cw}" height="{ch}" rx="18" fill="{p["shadow"]}" opacity="{p["shadow_op"]}" filter="url(#soft)"/>')
-    # feathered panel — edges fade instead of a hard rectangle
-    o.append('<g mask="url(#feather)">')
-    o.append(f'<rect x="{cx}" y="{cy}" width="{cw}" height="{ch}" rx="16" fill="{p["card"]}"/>')
-    o.append(f'<rect x="{cx}" y="{cy}" width="{cw}" height="{ch}" rx="16" fill="none" stroke="{p["border"]}" stroke-opacity="0.7"/>')
-    o.append(f'<path d="M{cx},{cy+16} a16,16 0 0 1 16,-16 h{cw-32} a16,16 0 0 1 16,16 v{TITLE_H-16} h-{cw} z" fill="{p["card2"]}"/>')
-    o.append(f'<line x1="{cx}" y1="{cy+TITLE_H}" x2="{cx+cw}" y2="{cy+TITLE_H}" stroke="{p["border"]}"/>')
-    o.append('</g>')
-    ty = cy + TITLE_H / 2
-    for i, col in enumerate(["#ec6a5e", "#f4bf4f", "#61c554"]):
-        o.append(f'<circle cx="{cx+22+i*18}" cy="{ty}" r="6" fill="{col}"/>')
-    o.append(T(cx + cw / 2, ty + 4.5, [("simakov@bali", p["ink"]), ("  : ~/dev", p["dim"])], 12.5, anchor="middle"))
-    built = S("built", "")
-    hdr = f"live · updated {built}" if built else "live · rebuilt daily"
-    hx = cx + cw - 22
-    o.append(T(hx, ty + 4, [(hdr, p["faint"])], 11, anchor="end"))
-    o.append(f'<circle class="pulse" cx="{hx - len(hdr) * 6.35 - 11:.0f}" cy="{ty}" r="4" fill="{p["ok"]}"/>')
 
-    # ascii (colored per char) — the "creature" gently bobs as it walks in place,
-    # with the two feet (bottom rows, split at the gap between them) stepping alternately.
-    def txt(x, cells):
-        return f'<text x="{x:.1f}" y="{yy:.1f}" font-size="{AF}" xml:space="preserve">{ascii_tspans(cells, p)}</text>'
+def card_habr(p):
+    w, h = 272, 168
+    habr = STATS.get("habr") or {}
+    o = [svg_open(w, h, "Articles on Habr", "")]
+    o += card_head(p, w, h, f"HABR · {habr.get('articles', 9)} ARTICLES · {short(habr.get('reads', 92000))} READS")
+    top = list(habr.get("top") or [])[:4]
+    latest = habr.get("latest")
+    if latest and latest["url"] not in [a["url"] for a in top]:
+        top = top[:3] + [dict(latest, new=True)]
+    for i, a in enumerate(top):
+        y = 56 + i * 23
+        o.append(T(18, y, [(short_title(a, 22 if a.get("new") else 27), p["ink"])], 12))
+        if a.get("new"):
+            o.append(f'<rect x="{190}" y="{y - 11}" width="30" height="15" rx="4" fill="{p["accent"]}" opacity="0.18"/>')
+            o.append(T(205, y, [("new", p["accent"])], 10, 600, anchor="middle"))
+        o.append(T(254, y, [(short(a["views"]), p["num"])], 12, anchor="end"))
+        if i < 3:
+            o.append(f'<path d="M18 {y + 8.5} H254" stroke="{p["border"]}"/>')
+    o.append(T(18, 156, [("RU · tests, ORM, AI", p["faint"])], 11.5))
+    o.append(T(254, 156, [("read →", p["accent"])], 11.5, anchor="end"))
+    o.append("</svg>")
+    return "".join(o)
 
-    LEG_ROWS = 3                                  # bottom rows that hold the legs/feet
-    leg_start = max(0, len(ROWS) - LEG_ROWS)
 
-    def gap_center(r):                            # midpoint of the widest interior space run
-        nz = [i for i, c in enumerate(r) if c[0] != " "]
-        if len(nz) < 2:
-            return None
-        lo, hi = nz[0], nz[-1]
-        best_len, best_c, run, start = 0, None, 0, lo
-        for i in range(lo, hi + 2):
-            blank = i <= hi and r[i][0] == " "
-            if blank:
-                if run == 0:
-                    start = i
-                run += 1
-            else:
-                if run > best_len:
-                    best_len, best_c = run, (start + i - 1) // 2
-                run = 0
-        return best_c if best_len >= 2 else None
+def short_title(a, limit):
+    known = HABR_SHORT.get(a["url"].rstrip("/").rsplit("/", 1)[-1])
+    if known and len(known) <= limit:
+        return known
+    t = re.split(r"[.:!?]\s", a["title"])[0]
+    if len(t) <= limit:
+        return t
+    cut = t[:limit - 1].rsplit(" ", 1)[0].rstrip(",;—-")
+    return cut + "…"
 
-    seam = next((gc for r in reversed(ROWS[leg_start:]) if (gc := gap_center(r)) is not None), ascii_cols // 2)
 
-    # depth: a soft contact shadow under the feet grounds the walk; the avatar itself
-    # gets a cast drop-shadow (url(#lift)) so it reads as a solid object above the panel.
-    acx = ascii_x + ascii_w / 2
-    feet_y = ascii_dy + len(ROWS) * ALH - 1
-    o.append(f'<ellipse class="csh" cx="{acx:.1f}" cy="{feet_y:.1f}" rx="{ascii_w*0.30:.1f}" ry="6.5" fill="{p["csh"]}" fill-opacity="{p["csh_op"]}" filter="url(#csh)"/>')
+def card_roadmap(p):
+    w, h = 272, 168
+    stars = ((STATS.get("featured") or {}).get("java-roadmap") or {}).get("stars", 0)
+    lessons = (STATS.get("roadmap") or {}).get("lessons")
+    xs, labs = [34, 96, 160, 222], ["Core", "Hibernate", "Spring", "Reliability"]
+    L = xs[-1] - xs[0]
+    style = f'.draw{{animation:draw 1.6s ease-out .3s both}}@keyframes draw{{from{{stroke-dashoffset:{L}}}to{{stroke-dashoffset:0}}}}'
+    o = [svg_open(w, h, "java-roadmap, from first class to production", style)]
+    o += card_head(p, w, h, "FOR JUNIORS · IN RUSSIAN", "java-roadmap")
+    o.append(T(18, 76, [("From first class to production.", p["dim"])], 12))
+    o.append(f'<path d="M{xs[0]} 104.5 H{xs[-1]}" stroke="{p["border"]}" stroke-width="2"/>')
+    o.append(f'<path class="draw" d="M{xs[0]} 104.5 H{xs[-1]}" stroke="{p["accent"]}" stroke-width="2" '
+             f'stroke-dasharray="{L}" stroke-dashoffset="0"/>')
+    for i, (x, l) in enumerate(zip(xs, labs)):
+        o.append(f'<circle cx="{x}" cy="104.5" r="5" fill="{p["card"]}" stroke="{p["accent"] if i < 3 else p["num"]}" stroke-width="2"/>')
+        o.append(T(x, 126, [(l, p["dim"])], 10.5, anchor="middle"))
+    o.append(T(18, 156, [(f"★ {stars}", p["num"]), (f"  ·  {lessons} lessons" if lessons else "", p["faint"])], 11.5))
+    o.append(T(254, 156, [("open →", p["accent"])], 11.5, anchor="end"))
+    o.append("</svg>")
+    return "".join(o)
 
-    o.append('<g class="bob" filter="url(#lift)">')
-    legL, legR = [], []
-    for i, r in enumerate(ROWS):
-        yy = ascii_dy + ALH * (i + 1)
-        if i >= leg_start:                        # split this row into left foot / right foot
-            legL.append(txt(ascii_x, r[:seam]))
-            legR.append(txt(ascii_x + seam * ACW, r[seam:]))
-        else:
-            o.append(txt(ascii_x, r))
-    o.append(f'<g class="legL">{"".join(legL)}</g>')
-    o.append(f'<g class="legR">{"".join(legR)}</g>')
-    o.append('</g>')
 
-    o.append(f'<g transform="translate({fetch_x:.1f},{fetch_dy:.1f})">')
-    o.extend(fops)
-    o.append('</g>')
-    # cursor: glow + solid block, taller/brighter
-    curX = fetch_x + curx; curY = fetch_dy + cury
-    o.append(f'<rect class="tcur" x="{curX:.0f}" y="{curY:.0f}" width="{FCW+1:.0f}" height="{FF:.0f}" rx="1" fill="{p["accent"]}" filter="url(#cg)" opacity="0.55"/>')
-    o.append(f'<rect class="tcur" x="{curX:.0f}" y="{curY:.0f}" width="{FCW+1:.0f}" height="{FF:.0f}" rx="1" fill="{p["accent"]}"/>')
+CONTACTS = [
+    ("tg", "Telegram", "@igoresha_simakov", "#2AABEE",
+     '<path d="M7.6 12.1 16.9 8.3c.5-.2.9.1.8.6l-1.6 7.6c-.1.5-.6.6-1 .4l-2.6-1.9-1.3 1.2c-.1.1-.3.2-.5.2l.2-2.6 4.7-4.3c.2-.2 0-.3-.3-.1l-5.8 3.7-2.5-.8c-.5-.2-.5-.5.1-.7z" fill="#fff"/>'),
+    ("mail", "Email", "simakoff30@gmail.com", "#E9A86B",
+     '<rect x="6.5" y="8" width="11" height="8" rx="1.6" fill="none" stroke="#fff" stroke-width="1.5"/>'
+     '<path d="M7 9l5 3.6L17 9" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>'),
+    ("in", "LinkedIn", "igor-simakov", "#0A66C2",
+     '<rect x="7.2" y="10.2" width="2.2" height="6.6" fill="#fff"/><circle cx="8.3" cy="7.9" r="1.3" fill="#fff"/>'
+     '<path d="M11.2 10.2h2.1v1c.4-.7 1.2-1.2 2.3-1.2 1.8 0 2.5 1.1 2.5 3v3.8h-2.2v-3.4c0-.9-.3-1.5-1.1-1.5s-1.4.6-1.4 1.5v3.4h-2.2z" fill="#fff"/>'),
+    ("mentor", "Mentoring", "18+ on GetMentor", "#9466C4",
+     '<path d="M12 7l6.5 3.2L12 13.4 5.5 10.2z" fill="#fff"/><path d="M8.3 11.8v2.6c0 .9 1.7 2 3.7 2s3.7-1.1 3.7-2v-2.6L12 13.6z" fill="#fff"/>'
+     '<path d="M18.5 10.2v3.4" stroke="#fff" stroke-width="1.1" stroke-linecap="round"/>'),
+]
 
-    # tools band: hairline + inlined tech-stack logos, centered
-    if TOOLS:
-        div_y = H - M - tools_band + 12
-        o.append(f'<line x1="{M+PAD_L}" y1="{div_y}" x2="{W-M-PAD_R}" y2="{div_y}" stroke="{p["border"]}"/>')
-        start_x = (W - tools_w) / 2
-        icon_y = div_y + (tools_band - 12 - ICON) / 2
-        for i, (name, inner) in enumerate(TOOLS):
-            x = start_x + i * (ICON + IGAP)
-            o.append(f'<svg x="{x:.1f}" y="{icon_y:.1f}" width="{ICON}" height="{ICON}" viewBox="0 0 128 128">{inner}</svg>')
 
-    o.append('</svg>')
-    return "\n".join(o)
+def card_contact(p, idx):
+    key, title, handle, brand, icon = CONTACTS[idx]
+    w, h = 196, 54
+    style = (f'.sh{{transform:translateX(-90px);animation:sh 7s ease-in-out {0.6 + idx * 0.22:.2f}s infinite}}'
+             f'@keyframes sh{{0%{{transform:translateX(-90px)}}18%,100%{{transform:translateX({w + 40}px)}}}}')
+    o = [svg_open(w, h, f"{title}: {handle}", style)]
+    o.append(f'<defs><clipPath id="r"><rect x="0.5" y="0.5" width="{w - 1}" height="{h - 1}" rx="12"/></clipPath>'
+             f'<linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/>'
+             f'<stop offset="0.5" stop-color="#fff" stop-opacity="{p["sheen"]}"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>'
+             f'<linearGradient id="b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{p["accent2"]}" stop-opacity="0.55"/>'
+             f'<stop offset="1" stop-color="{p["accent"]}" stop-opacity="0.55"/></linearGradient></defs>')
+    o.append(f'<rect x="0.5" y="0.5" width="{w - 1}" height="{h - 1}" rx="12" fill="{p["card"]}" stroke="url(#b)"/>')
+    o.append(f'<g transform="translate(13 12)"><rect width="30" height="30" rx="9" fill="{brand}"/>'
+             f'<g transform="translate(3 3)">{icon}</g></g>')
+    o.append(T(54, 24, [(title, p["ink"])], 13.5, 700, family=SANS))
+    o.append(T(54, 41, [(handle, p["dim"])], 10.8))
+    o.append(f'<g clip-path="url(#r)"><g transform="skewX(-20)"><rect class="sh" x="0" y="-20" width="46" '
+             f'height="{h + 40}" fill="url(#g)"/></g></g>')
+    o.append("</svg>")
+    return "".join(o)
 
-for theme in ("dark", "light"):
-    open(f"{theme}.svg", "w").write(build(theme))
-    print("wrote", f"{theme}.svg")
+
+if __name__ == "__main__":
+    os.makedirs("cards", exist_ok=True)
+    for theme, p in PAL.items():
+        out = {f"{theme}.svg": hero(p),
+               f"cards/buddy-{theme}.svg": card_buddy(p),
+               f"cards/habr-{theme}.svg": card_habr(p),
+               f"cards/roadmap-{theme}.svg": card_roadmap(p)}
+        out.update({f"cards/contact-{c[0]}-{theme}.svg": card_contact(p, i) for i, c in enumerate(CONTACTS)})
+        for path, svg in out.items():
+            open(path, "w").write(svg)
+            print("wrote", path)

@@ -9,8 +9,6 @@ on:
     paths:
       - "today.py"
       - "build_svg.py"
-      - "face.json"
-      - "tools.json"
       - ".github/workflows/main.yml"
 
 permissions:
@@ -37,6 +35,6 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add dark.svg light.svg stats.json loc.json
+          git add dark.svg light.svg cards stats.json loc.json
           git diff --staged --quiet || git commit -m "chore: refresh profile card [skip ci]"
           git push

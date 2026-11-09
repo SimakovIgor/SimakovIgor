@@ -1,4 +1,0 @@
-# Only needed to regenerate the ASCII avatar from avatar.png (generate_avatar.py).
-# The daily GitHub Action itself uses the standard library only — no installs.
-Pillow
-numpy
