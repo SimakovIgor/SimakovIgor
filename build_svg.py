@@ -210,7 +210,7 @@ def hero(p):
         ("WRITE", [(str(habr.get("articles", 9)), p["num"]), (" articles on Habr · ", p["ink"]),
                    (short(habr.get("reads", 92000)), p["num"]), (" reads", p["ink"])]),
         ("MENTOR", [("21", p["num"]), (" mentees on OpenMentor", p["ink"])]),
-        ("REACH", [("@igoresha_simakov", p["ink"]), (" · ", p["faint"]), ("simakoff30@gmail.com", p["ink"])]),
+        ("REACH", [("@igoresha_simakov", p["ink"]), (" · ", p["faint"]), ("Simakoff10@mail.ru", p["ink"])]),
     ]
     for i, (lab, val) in enumerate(rows):
         y = 184 + i * 48
@@ -311,7 +311,7 @@ def card_roadmap(p):
 CONTACTS = [
     ("tg", "Telegram", "@igoresha_simakov", "#2AABEE",
      '<path d="M7.6 12.1 16.9 8.3c.5-.2.9.1.8.6l-1.6 7.6c-.1.5-.6.6-1 .4l-2.6-1.9-1.3 1.2c-.1.1-.3.2-.5.2l.2-2.6 4.7-4.3c.2-.2 0-.3-.3-.1l-5.8 3.7-2.5-.8c-.5-.2-.5-.5.1-.7z" fill="#fff"/>'),
-    ("mail", "Email", "simakoff30@gmail.com", "#E9A86B",
+    ("mail", "Email", "Simakoff10@mail.ru", "#E9A86B",
      '<rect x="6.5" y="8" width="11" height="8" rx="1.6" fill="none" stroke="#fff" stroke-width="1.5"/>'
      '<path d="M7 9l5 3.6L17 9" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>'),
     ("in", "LinkedIn", "igor-simakov", "#0A66C2",

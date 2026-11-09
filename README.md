@@ -16,7 +16,7 @@
 
 <p align="center">
   <a href="https://t.me/igoresha_simakov"><picture><source media="(prefers-color-scheme: light)" srcset="./cards/contact-tg-light.svg"><img alt="Telegram @igoresha_simakov" src="./cards/contact-tg-dark.svg" width="196"></picture></a>
-  <a href="mailto:simakoff30@gmail.com"><picture><source media="(prefers-color-scheme: light)" srcset="./cards/contact-mail-light.svg"><img alt="Email simakoff30@gmail.com" src="./cards/contact-mail-dark.svg" width="196"></picture></a>
+  <a href="mailto:Simakoff10@mail.ru"><picture><source media="(prefers-color-scheme: light)" srcset="./cards/contact-mail-light.svg"><img alt="Email Simakoff10@mail.ru" src="./cards/contact-mail-dark.svg" width="196"></picture></a>
   <a href="https://www.linkedin.com/in/igor-simakov-131198233/"><picture><source media="(prefers-color-scheme: light)" srcset="./cards/contact-in-light.svg"><img alt="LinkedIn" src="./cards/contact-in-dark.svg" width="196"></picture></a>
   <a href="https://openmentor.io/mentor/igor-simakov"><picture><source media="(prefers-color-scheme: light)" srcset="./cards/contact-mentor-light.svg"><img alt="Mentoring on OpenMentor" src="./cards/contact-mentor-dark.svg" width="196"></picture></a>
 </p>
