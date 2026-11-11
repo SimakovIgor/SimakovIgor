@@ -100,42 +100,6 @@ def mix(c1, c2, t):
     return "#%02x%02x%02x" % tuple(round(x + (y - x) * t) for x, y in zip(a, b))
 
 
-TOUR, SLOT, FADE, REST, TOUR_AT = 5, 2.4, 0.5, 3.0, 2.9
-CYCLE = TOUR * SLOT + REST
-
-
-def column(x, y, h, a, b, top, p):
-    return (f'<path d="M{x - a:.1f} {y + b - h:.1f}l{a} {b}v{h:.1f}l{-a} {-b}z" fill="{mix(top, "#000000", p["side1"])}"/>'
-            f'<path d="M{x:.1f} {y + 2 * b - h:.1f}l{a} {-b}v{h:.1f}l{-a} {b}z" fill="{mix(top, "#000000", p["side2"])}"/>'
-            f'<path d="M{x:.1f} {y - h:.1f}l{a} {b}l{-a} {b}l{-a} {-b}z" fill="{top}"/>')
-
-
-def tour_days(cells, start):
-    picked, months = [], set()
-    for c, wi, di in sorted(((c, wi, di) for _, wi, di, c in cells if c), reverse=True):
-        month = (start + datetime.timedelta(days=7 * wi + di)).strftime("%Y-%m")
-        if month not in months:
-            months.add(month)
-            picked.append((c, wi, di))
-    picked = picked[:TOUR]
-    return picked[:1] + sorted(picked[1:], key=lambda t: (t[1] < picked[0][1], t[1]))
-
-
-def tour_style():
-    def at(t):
-        return f"{100 * t / CYCLE:.2f}%"
-
-    ease = "cubic-bezier(.45,0,.25,1)"
-    return (f'@keyframes lift{{0%{{opacity:0;transform:translateY(7px)}}{at(FADE)},{at(SLOT)}{{opacity:1;transform:none}}'
-            f'{at(SLOT + FADE)},100%{{opacity:0;transform:translateY(7px)}}}}'
-            f'@keyframes orig{{0%,{at(FADE * 0.4)},{at(SLOT + FADE * 0.6)},100%{{opacity:1}}{at(FADE)},{at(SLOT)}{{opacity:0}}}}'
-            f'@keyframes tip{{0%,{at(0.25)}{{opacity:0;transform:translateY(5px)}}{at(0.65)},{at(SLOT - 0.1)}{{opacity:1;transform:none}}'
-            f'{at(SLOT + 0.2)},100%{{opacity:0;transform:translateY(-3px)}}}}'
-            f'@keyframes dim{{0%,{at(TOUR * SLOT + FADE * 1.6)},100%{{opacity:1}}{at(FADE * 1.4)},{at(TOUR * SLOT)}{{opacity:.5}}}}'
-            f'.dim{{animation:dim {CYCLE}s {ease} {TOUR_AT}s infinite}}'
-            f'.lift,.orig,.tip{{animation:lift {CYCLE}s {ease} infinite both}}.orig{{animation-name:orig}}.tip{{animation-name:tip}}')
-
-
 def city(p, ox, oy, a=4.7, b=3.05, hmax=92):
     weeks = [list(w) for w in (STATS.get("days") or [[0] * 7] * 53)]
     pad = 7 - len(weeks[0])
@@ -149,29 +113,27 @@ def city(p, ox, oy, a=4.7, b=3.05, hmax=92):
     def height(c):
         return 2 + math.sqrt(c / hi) * hmax
 
-    cells, last = [], None
+    cells, last, peak = [], None, None
     for wi, w in enumerate(weeks):
         for di, c in enumerate(w):
             if c is None:
                 continue
             cells.append((wi + di, wi, di, c))
             last = (wi, di, c)
-    tour = tour_days(cells, start)
-    slot = {(wi, di): i for i, (_, wi, di) in enumerate(tour)}
-
-    def delay(i):
-        return f'style="animation-delay:{TOUR_AT + i * SLOT:.1f}s"'
-
-    o = ['<g class="dim">']
+            if c and (peak is None or c > peak[2]):
+                peak = (wi, di, c)
+    o = []
     for _, wi, di, c in sorted(cells):
         x, y = ox + (wi - di) * a, oy + (wi + di) * b
         o.append(f'<path d="M{x:.1f} {y:.1f}l{a} {b}l{-a} {b}l{-a} {-b}z" fill="{p["tile"]}"/>')
         if not c:
             continue
-        col = column(x, y, height(c), a, b, p["lv"][sum(c > q for q in qs)], p)
-        if (wi, di) in slot:
-            col = f'<g class="orig" {delay(slot[wi, di])}>{col}</g>'
-        o.append(f'<g class="rise" style="animation-delay:{0.35 + wi * 0.028:.2f}s">{col}</g>')
+        top = p["lv"][sum(c > q for q in qs)]
+        h = height(c)
+        o.append(f'<g class="rise" style="animation-delay:{0.35 + wi * 0.028:.2f}s">'
+                 f'<path d="M{x - a:.1f} {y + b - h:.1f}l{a} {b}v{h:.1f}l{-a} {-b}z" fill="{mix(top, "#000000", p["side1"])}"/>'
+                 f'<path d="M{x:.1f} {y + 2 * b - h:.1f}l{a} {-b}v{h:.1f}l{-a} {b}z" fill="{mix(top, "#000000", p["side2"])}"/>'
+                 f'<path d="M{x:.1f} {y - h:.1f}l{a} {b}l{-a} {b}l{-a} {-b}z" fill="{top}"/></g>')
 
     ang = math.degrees(math.atan2(b, a))
     firsts = [wi for wi in range(1, len(weeks)) if (start + datetime.timedelta(days=7 * wi)).day <= 7]
@@ -180,32 +142,25 @@ def city(p, ox, oy, a=4.7, b=3.05, hmax=92):
         x, y = ox + (wi - 7) * a - 7, oy + (wi + 7) * b + 15
         o.append(f'<text transform="translate({x:.1f} {y:.1f}) rotate({ang:.1f})" font-family="{MONO}" font-size="9.5" '
                  f'fill="{p["faint"]}">{d.strftime("%b")}</text>')
-    o.append('</g>')
 
+    late = []
+    if peak:
+        wi, di, c = peak
+        x, y = ox + (wi - di) * a, oy + (wi + di) * b - height(c)
+        ty = 78
+        when = start + datetime.timedelta(days=7 * wi + di)
+        day = f"{when.day} {when:%b}"
+        label = [("peak ", p["faint"]), (str(c), p["num"]), (f" · {day}", p["faint"])]
+        lw = sum(len(t) for t, _ in label) * 6.6
+        anchor_end = x + 6 + lw > 316
+        late.append(f'<path d="M{x:.1f} {y - 3:.1f} V{ty + 5}" stroke="{p["faint"]}" stroke-dasharray="1.5 2.5"/>'
+                    f'<circle cx="{x:.1f}" cy="{y - 3:.1f}" r="1.8" fill="{p["num"]}"/>')
+        late.append(T(x - 6 if anchor_end else x + 6, ty + 4, label, 11, anchor="end" if anchor_end else None))
     if last:
         wi, di, c = last
         x, y = ox + (wi - di) * a, oy + (wi + di) * b + b - (height(c) if c else 0)
-        o.append(f'<g class="late"><circle class="pulse" cx="{x:.1f}" cy="{y - 7:.1f}" r="3" fill="{p["ok"]}"/></g>')
-
-    for i, (c, wi, di) in enumerate(tour):
-        x, y = ox + (wi - di) * a, oy + (wi + di) * b
-        h, hidden = height(c), ' opacity="0"' if i else ''
-        when = start + datetime.timedelta(days=7 * wi + di)
-        label = [(str(c), p["card"]), (f" contributions · {when:%b} {when.day}", mix(p["card"], p["tip"], 0.4))]
-        if i == 0:
-            label.append((" · peak", p["card"]))
-        tw = sum(len(t) for t, _ in label) * 6.6 + 18
-        top = y - h - 7
-        tx = min(max(x - tw / 2, 12), 314 - tw)
-        o.append(f'<g class="lift" {delay(i)}{hidden}>'
-                 f'<path d="M{x:.1f} {y - 1.5:.1f}l{a + 2.5} {b + 1.5}l{-a - 2.5} {b + 1.5}l{-a - 2.5} {-b - 1.5}z" '
-                 f'fill="none" stroke="{p["hl"]}" stroke-width="1.2" transform="translate(0 7)"/>'
-                 f'<g filter="url(#glow)" opacity="0.7">{column(x, y - 7, h, a, b, p["hl"], p)}</g>'
-                 f'{column(x, y - 7, h, a, b, p["hl"], p)}</g>')
-        o.append(f'<g class="tip" {delay(i)}{hidden}>'
-                 f'<rect x="{tx:.1f}" y="{top - 30:.1f}" width="{tw:.1f}" height="22" rx="6" fill="{p["tip"]}"/>'
-                 f'<path d="M{x - 5:.1f} {top - 8.5:.1f}l5 5l5 -5z" fill="{p["tip"]}"/>'
-                 f'{T(tx + 9, top - 15, label, 11)}</g>')
+        late.append(f'<circle class="pulse" cx="{x:.1f}" cy="{y - 7:.1f}" r="3" fill="{p["ok"]}"/>')
+    o.append(f'<g class="late">{"".join(late)}</g>')
     return "".join(o)
 
 
@@ -240,11 +195,10 @@ def hero(p):
     years = int(STATS.get("built", "2026")[:4]) - CAREER_START
     habr = STATS.get("habr") or {}
     style = (f'.pulse{{animation:pulse 2.2s ease-in-out infinite}}@keyframes pulse{{0%,100%{{opacity:1}}65%{{opacity:.25}}}}'
-             f'.rise{{transform-box:fill-box;transform-origin:50% 100%;animation:rise .9s cubic-bezier(.3,1.3,.5,1) both}}'
-             f'@keyframes rise{{from{{transform:scaleY(0)}}}}' + tour_style() +
+             f'.rise{{transform-box:fill-box;transform-origin:50% 100%;animation:rise .8s cubic-bezier(.2,.9,.25,1) both}}'
+             f'@keyframes rise{{from{{transform:scaleY(0)}}}}'
              f'.late{{animation:late .4s ease-out 2.2s both}}@keyframes late{{from{{opacity:0}}}}')
     o = [svg_open(W, H, "Igor Simakov, Java backend lead: a year of contributions, live GitHub stats and what I do", style)]
-    o.append('<defs><filter id="glow" x="-60%" y="-30%" width="220%" height="160%"><feGaussianBlur stdDeviation="5"/></filter></defs>')
     o += frame(p, W, H, title_bar=True)
     o += merged_bar(p, W)
 
