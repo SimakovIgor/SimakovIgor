@@ -1,8 +1,8 @@
 {
  "year": 2026,
- "built": "2026-11-14",
+ "built": "2026-11-15",
  "repos": 35,
- "stars": 32,
+ "stars": 33,
  "followers": 11,
  "commits": 3693,
  "added": 1088651,
@@ -19,17 +19,8 @@
   ]
  ],
  "contributions": 3783,
- "since": "2025-11-09",
+ "since": "2025-11-16",
  "days": [
-  [
-   0,
-   0,
-   0,
-   0,
-   3,
-   0,
-   0
-  ],
   [
    0,
    0,
@@ -497,6 +488,9 @@
    72,
    46,
    0
+  ],
+  [
+   0
   ]
  ],
  "featured": {
@@ -505,7 +499,7 @@
    "lang": "Java"
   },
   "pixel-buddy": {
-   "stars": 7,
+   "stars": 8,
    "lang": "TypeScript"
   }
  },
@@ -515,7 +509,7 @@
  },
  "habr": {
   "articles": 10,
-  "reads": 110400,
+  "reads": 111400,
   "latest": {
    "url": "https://habr.com/ru/articles/1092932/",
    "title": "Полгода не пишем код руками. Посчитал, что стало с багами",
@@ -525,7 +519,7 @@
    {
     "url": "https://habr.com/ru/companies/banki/articles/814485/",
     "title": "Гайд по использованию JUnit 5, Mockito и AssertJ для проверки поведения кода",
-    "views": 20000
+    "views": 21000
    },
    {
     "url": "https://habr.com/ru/articles/1045648/",
